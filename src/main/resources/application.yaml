@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/doc_searching?useSSL=false&serverTimezone=UTC
+    username: root
+    password: 
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    # When the application is executed, JPA automatically generates the database schema based on the entities
+#    hibernate:
+#      ddl-auto: create
+    properties:
+      hibernate:
+        # Hibernate in interacting with a MySQL database is to understand and support the SQL syntax and characteristics specific to MySQL, enabling it to generate appropriate SQL queries
+        dialect: org.hibernate.dialect.MySQLDialect
