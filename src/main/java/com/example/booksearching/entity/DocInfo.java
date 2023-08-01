@@ -18,19 +18,20 @@ public class DocInfo {
     @Id
     @Column(length = 100)
     private String id;
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DocType type;
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 250)
     private String name;
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 200)
     private String kdcLabel;
     @Column(nullable = false, length = 3)
     private String kdcCode;
-    @Column(nullable = false, length = 300)
+    @Column(nullable = false, length = 600)
     private String summary;
-    @Column(length = 100)
+    @Column(length = 200)
     private String author;
-    @Column(length = 100)
+    @Column(length = 200)
     private String publisher;
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "yyyy")
