@@ -141,3 +141,6 @@ bin/
 
 ### VS Code ###
 .vscode/
+
+### CSV Data ###
+*.csv
