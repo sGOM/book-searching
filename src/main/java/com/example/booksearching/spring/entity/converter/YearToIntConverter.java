@@ -1,4 +1,4 @@
-package com.example.booksearching.entity.converter;
+package com.example.booksearching.spring.entity.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
@@ -17,4 +17,5 @@ public class YearToIntConverter implements AttributeConverter<Year, Integer> {
     public Year convertToEntityAttribute(Integer yearValue) {
         return yearValue != null ? Year.of(yearValue) : null;
     }
+
 }
