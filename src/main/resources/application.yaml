@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/doc_searching?serverTimezone=UTC
-    username: root
-    password: 
+    url: change me
+    username: change me
+    password: change me
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     # When the application is executed, JPA automatically generates the database schema based on the entities
@@ -12,3 +12,17 @@ spring:
       hibernate:
         # Hibernate in interacting with a MySQL database is to understand and support the SQL syntax and characteristics specific to MySQL, enabling it to generate appropriate SQL queries
         dialect: org.hibernate.dialect.MySQLDialect
+
+database:
+  url: change me
+  username: change me
+  password: change me
+
+# elasticsearch configuration
+elasticsearch:
+  host: change me
+  port: 9200
+  username: elastic
+  password: change me
+  encodedApiKey: change me
+  fingerprint: change me
