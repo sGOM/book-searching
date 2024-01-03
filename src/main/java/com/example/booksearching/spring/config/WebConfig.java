@@ -1,4 +1,4 @@
-package com.example.booksearching.config;
+package com.example.booksearching.spring.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -14,4 +14,5 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET")
                 .allowCredentials(true);
     }
+
 }
