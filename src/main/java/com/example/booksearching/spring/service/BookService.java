@@ -2,7 +2,10 @@ package com.example.booksearching.spring.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
-import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import co.elastic.clients.elasticsearch._types.query_dsl.DisMaxQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchPhraseQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.*;
@@ -20,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,50 +41,35 @@ public class BookService {
         final String BOOK_INDEX = "books";
         final String FIELD_NAME = "title";
         final Integer SIZE = 10;
+        final Float KEYWORD_BOOST_VALUE = 2f;
+        final Float PHRASE_BOOST_VALUE = 1.5f;
+        final Float LANGUAGE_BOOST_VALUE = 1.2f;
         final Float DEFAULT_BOOST_VALUE = 1f;
         final Float PARTIAL_BOOST_VALUE = 0.3f;
 
-        // field = {"", "_engtokor", "_chosung", "_jamo"}
-        Map<String, Float> fieldBoostMap = Map.of(
-                "", DEFAULT_BOOST_VALUE,
-                "_engtokor", DEFAULT_BOOST_VALUE
-        );
-        Map<String, Float> koreanPhonemefieldBoostMap = Map.of(
-                "_chosung", DEFAULT_BOOST_VALUE,
-                "_jamo", DEFAULT_BOOST_VALUE
-        );
-
-        // option = {".exact", ".edge", ".partial"}
-        Map<String, Float> optionBoostMap = Map.of(
-                ".exact", DEFAULT_BOOST_VALUE,
+        String[] fieldSuffixes = containsKorean(keyword) ? new String[]{"", "_chosung", "_jamo"} : new String[]{"", "_engtokor"};
+        Map<String, Float> boostValueByMultiFieldMap = Map.of(
+                "", KEYWORD_BOOST_VALUE,
                 ".edge", DEFAULT_BOOST_VALUE,
                 ".partial", PARTIAL_BOOST_VALUE
         );
 
-        // MultiMatchQuery 생성
-        MultiMatchQuery multiMatchQuery = createMultiMatchQuery(keyword, FIELD_NAME, fieldBoostMap, optionBoostMap, TextQueryType.BestFields);
-        MultiMatchQuery koreanPhonemeMultiMatchQuery = createMultiMatchQuery(keyword, FIELD_NAME, koreanPhonemefieldBoostMap, optionBoostMap, TextQueryType.Phrase);
+        List<Query> queryList = new ArrayList<>(createMatchQueryList(FIELD_NAME, fieldSuffixes, boostValueByMultiFieldMap, keyword).stream().map(MatchQuery::_toQuery).toList());
+        String languageField = FIELD_NAME + (containsKorean(keyword) ? ".kor" : ".en");
+        queryList.add(createMatchQuery(keyword, languageField, LANGUAGE_BOOST_VALUE)._toQuery());
+        queryList.add(createMatchPhraseQuery(keyword, languageField, PHRASE_BOOST_VALUE)._toQuery());
+
+        DisMaxQuery disMaxQuery = new DisMaxQuery.Builder()
+                .queries(queryList)
+                .build();
 
         // Highlight 생성
-        Highlight highlight = createHighlightFieldMap(
-                Stream.of(multiMatchQuery.fields(), koreanPhonemeMultiMatchQuery.fields())
-                        .flatMap(Collection::stream)
-                        .toList()
-        );
+        Highlight highlight = createHighlightFieldMap(List.of(FIELD_NAME, FIELD_NAME + ".en", FIELD_NAME + ".kor", FIELD_NAME + ".edge", FIELD_NAME + ".partial"));
 
         SearchRequest searchRequest = new SearchRequest.Builder()
                 .index(BOOK_INDEX)
                 .size(SIZE)
-                .query(queryBuilder ->
-                        queryBuilder.bool(boolBuilder ->
-                                boolBuilder.should(
-                                        List.of(
-                                                multiMatchQuery._toQuery(),
-                                                koreanPhonemeMultiMatchQuery._toQuery()
-                                        )
-                                )
-                        )
-                )
+                .query(queryBuilder -> queryBuilder.disMax(disMaxQuery))
                 .highlight(highlight)
                 .build();
 
@@ -108,19 +95,34 @@ public class BookService {
         return res;
     }
 
-    private List<String> createMultiMatchFieldList(String fieldName, Map<String, Float> fieldBoostMap, Map<String, Float> optionBoostMap) {
-        return fieldBoostMap.entrySet().stream()
-                .flatMap(fieldBoostEntry ->
-                    optionBoostMap.entrySet().stream()
-                            .map(optionBoostEntry -> fieldName + fieldBoostEntry.getKey() + optionBoostEntry.getKey() + "^" + fieldBoostEntry.getValue() * optionBoostEntry.getValue())
-                ).toList();
+    private boolean containsKorean(String text) {
+        return (text != null) && text.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
     }
 
-    private MultiMatchQuery createMultiMatchQuery(String keyword, String fieldName, Map<String, Float> fieldBoostMap, Map<String, Float> optionBoostMap, TextQueryType queryType) {
-        return new MultiMatchQuery.Builder()
+    private List<MatchQuery> createMatchQueryList(String fieldName, String[] fieldSuffixes, Map<String, Float> boostValueByMultiFieldMap, String keyword) {
+        return Arrays.stream(fieldSuffixes)
+                .flatMap(fieldSuffix -> boostValueByMultiFieldMap.entrySet().stream()
+                        .map(boostValueByMultiFieldEnt -> {
+                            String multiField = boostValueByMultiFieldEnt.getKey();
+                            Float boostValue = boostValueByMultiFieldEnt.getValue();
+                            return createMatchQuery(keyword, fieldName + fieldSuffix + multiField, boostValue);
+                        }))
+                .collect(Collectors.toList());
+    }
+
+    private MatchQuery createMatchQuery(String keyword, String fieldName, Float boostValue) {
+        return new MatchQuery.Builder()
                 .query(keyword)
-                .type(queryType)
-                .fields(createMultiMatchFieldList(fieldName, fieldBoostMap, optionBoostMap))
+                .field(fieldName)
+                .boost(boostValue)
+                .build();
+    }
+
+    private MatchPhraseQuery createMatchPhraseQuery(String keyword, String fieldName, Float boostValue) {
+        return new MatchPhraseQuery.Builder()
+                .query(keyword)
+                .field(fieldName)
+                .boost(boostValue)
                 .build();
     }
 
@@ -129,7 +131,7 @@ public class BookService {
         Map<String, HighlightField> highlightFieldMap = new HashMap<>();
         for (String fieldName : fieldNames) {
             highlightFieldMap.put(
-                    fieldName.substring(0, fieldName.lastIndexOf('^')),
+                    fieldName,
                     new HighlightField.Builder().postTags("</strong>").preTags("<strong>").build()
             );
         }
