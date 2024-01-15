@@ -139,7 +139,7 @@ public class DataBaseIndexingApplication {
   public static void executeBookPipeline() {
     try {
       readBookData();
-      translateBookDocuments();
+      convertBookToBookDocument();
       indexingDocs();
     } catch (Exception e) {
       log.error("Error in executeBookPipeLine: ", e);
@@ -171,7 +171,7 @@ public class DataBaseIndexingApplication {
     }
   }
 
-  public static void translateBookDocuments() {
+  public static void convertBookToBookDocument() {
     bookDocs = new ArrayList<>();
     BookDocument doc;
 
