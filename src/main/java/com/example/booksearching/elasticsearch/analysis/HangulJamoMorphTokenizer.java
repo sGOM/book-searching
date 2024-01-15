@@ -84,9 +84,15 @@ public class HangulJamoMorphTokenizer {
       case "JONGSUNG" -> jongsungTokenizer(source);
       case "KORTOENG" -> convertKoreanToEnglish(source);
       default -> jamoTokenizer(source);
+    // 한글을 포함하지 않았다면, tokenizing에서 제외
+    if (!containsKorean(source)) {
+      return null;
+    }
     };
 
     return jamo;
+  private boolean containsKorean(String text) {
+    return text != null && text.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
   }
 
   public String jamoTokenizer(String source) {
