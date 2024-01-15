@@ -88,6 +88,7 @@ public class DataBaseIndexingApplication {
       // And create the API client
       ElasticsearchClient esClient = new ElasticsearchClient(transport);
 
+      log.info("Start indexing...");
       long start = System.currentTimeMillis();
 
       IntStream.range(0, (totalSize + batchSize - 1) / batchSize)
@@ -99,8 +100,8 @@ public class DataBaseIndexingApplication {
               });
 
       long end = System.currentTimeMillis();
-      log.debug("수행시간: " + (end - start) + " ms");
-      log.debug("Total Generated Documents : {}", bookDocs.size());
+      log.info("수행시간: " + (end - start) + " ms");
+      log.info("Total Generated Documents : {}", bookDocs.size());
     } catch (Exception e) {
       log.error("Create or request Elasticsearch request error", e);
     }
@@ -175,7 +176,7 @@ public class DataBaseIndexingApplication {
     bookDocs = new ArrayList<>();
     BookDocument doc;
 
-    log.info("Start translation...");
+    log.info("Start converting...");
     long start = System.currentTimeMillis();
     for (Book book : books) {
       doc = BookDocument.of(
