@@ -8,6 +8,7 @@ import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.TransportUtils;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.example.booksearching.elasticsearch.analysis.HanguelJamoType;
 import com.example.booksearching.elasticsearch.analysis.HangulJamoMorphTokenizer;
 import com.example.booksearching.elasticsearch.model.Book;
 import com.example.booksearching.elasticsearch.model.BookDocument;
@@ -24,7 +25,6 @@ import javax.net.ssl.SSLContext;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -181,9 +181,9 @@ public class DataBaseIndexingApplication {
       doc = BookDocument.of(
         book.getIsbnThirteenNo(),
         book.getTitleName(),
-        morphTokenizer.chosungTokenizer(book.getTitleName()),
-        morphTokenizer.jamoTokenizer(book.getTitleName()),
-        morphTokenizer.convertKoreanToEnglish(book.getTitleName()),
+        morphTokenizer.tokenizer(book.getTitleName(), HanguelJamoType.CHOSUNG),
+        morphTokenizer.tokenizer(book.getTitleName(), HanguelJamoType.JAMO),
+        morphTokenizer.tokenizer(book.getTitleName(), HanguelJamoType.KORTOENG),
         book.getAuthorName(),
         book.getPublicationYear()
       );
