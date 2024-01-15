@@ -2,45 +2,48 @@ let arr = [];
 let currentFocus = -1;
 
 $(document).ready(function () {
-    /* 이벤트 리스너 + 자동완성 리스트 생성 로직 */
-    updateAutoCompleteList();
     /* 검색 창에서 키보드 입력이 있을 때마다, 자동 완성 배열 최신화 */
-    $("#mysearch").keyup(function () {
+    $("#mysearch").keyup(async function () {
         let keyword = $("#mysearch").val();
 
-        $.ajax({
-            url: 'http://localhost:8080/docinfos/search',
-            type: 'GET',
-            data: {keyword: keyword},
-            success: function (res) {
-                arr = res;
-                if (arr.length <= currentFocus) {
-                    currentFocus = 0;
-                }
-            },
-            error: function (err) {
-                console.log('Error:', err);
+        try {
+            let res = await $.ajax({
+                url: 'http://localhost:8080/books/search',
+                type: 'GET',
+                data: {keyword: keyword},
+            });
+
+            arr = res;
+
+            if (arr.length <= currentFocus) {
+                currentFocus = 0;
             }
-        });
+            let inp = document.getElementById("mysearch");
+            /*execute a function when someone writes in the text field:*/
+
+            /* 기존에 존재하는 자동 완성 리스트 제거 */
+            closeAllLists();
+            /* 입력 값이 없다면 함수 종료 */
+            if (!inp.value) return false;
+
+            /* 새로 생성한 자동 완성 리스트 (DIV) */
+            let autoCompleteList = createAutoCompleteList(this.id);
+            /* 새로 생성한 자동 완성 리스트를 화면에 추가 */
+            this.parentNode.appendChild(autoCompleteList);
+            /* 자동 완성 리스트의 요소들을 추가 */
+            addAutoCompleteElement(autoCompleteList, inp);
+
+            /* 이벤트 리스너 + 자동완성 리스트 생성 로직 */
+            updateAutoCompleteList();
+        } catch (err) {
+            console.log('Error:', err);
+        }
     });
 });
 
 function updateAutoCompleteList() {
     let inp = document.getElementById("mysearch");
     /*execute a function when someone writes in the text field:*/
-    inp.addEventListener("input", function (e) {
-        /* 기존에 존재하는 자동 완성 리스트 제거 */
-        closeAllLists();
-        /* 입력 값이 없다면 함수 종료 */
-        if (!inp.value) return false;
-
-        /* 새로 생성한 자동 완성 리스트 (DIV) */
-        let autoCompleteList = createAutoCompleteList(this.id);
-        /* 새로 생성한 자동 완성 리스트를 화면에 추가 */
-        this.parentNode.appendChild(autoCompleteList);
-        /* 자동 완성 리스트의 요소들을 추가 */
-        addAutoCompleteElement(autoCompleteList, inp);
-    });
 
     /* key down (Up, Down Arrow나 Enter) 이벤트 발생 시 */
     inp.addEventListener("keydown", function (e) {
