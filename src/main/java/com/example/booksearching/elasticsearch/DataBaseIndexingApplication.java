@@ -185,9 +185,6 @@ public class DataBaseIndexingApplication {
         morphTokenizer.jamoTokenizer(book.getTitleName()),
         morphTokenizer.convertKoreanToEnglish(book.getTitleName()),
         book.getAuthorName(),
-        morphTokenizer.chosungTokenizer(Optional.ofNullable(book.getAuthorName()).orElse("")),
-        morphTokenizer.jamoTokenizer(Optional.ofNullable(book.getAuthorName()).orElse("")),
-        morphTokenizer.convertKoreanToEnglish(Optional.ofNullable(book.getAuthorName()).orElse("")),
         book.getPublicationYear()
       );
       bookDocs.add(doc);
