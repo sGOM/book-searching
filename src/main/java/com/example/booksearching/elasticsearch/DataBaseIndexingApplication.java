@@ -8,6 +8,7 @@ import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.TransportUtils;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.example.booksearching.elasticsearch.analysis.HanguelJamoType;
 import com.example.booksearching.elasticsearch.analysis.HangulJamoMorphTokenizer;
 import com.example.booksearching.elasticsearch.model.Book;
 import com.example.booksearching.elasticsearch.model.BookDocument;
@@ -24,7 +25,6 @@ import javax.net.ssl.SSLContext;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -88,6 +88,7 @@ public class DataBaseIndexingApplication {
       // And create the API client
       ElasticsearchClient esClient = new ElasticsearchClient(transport);
 
+      log.info("Start indexing...");
       long start = System.currentTimeMillis();
 
       IntStream.range(0, (totalSize + batchSize - 1) / batchSize)
@@ -99,8 +100,8 @@ public class DataBaseIndexingApplication {
               });
 
       long end = System.currentTimeMillis();
-      log.debug("수행시간: " + (end - start) + " ms");
-      log.debug("Total Generated Documents : {}", bookDocs.size());
+      log.info("수행시간: " + (end - start) + " ms");
+      log.info("Total Generated Documents : {}", bookDocs.size());
     } catch (Exception e) {
       log.error("Create or request Elasticsearch request error", e);
     }
@@ -139,7 +140,7 @@ public class DataBaseIndexingApplication {
   public static void executeBookPipeline() {
     try {
       readBookData();
-      translateBookDocuments();
+      convertBookToBookDocument();
       indexingDocs();
     } catch (Exception e) {
       log.error("Error in executeBookPipeLine: ", e);
@@ -171,19 +172,19 @@ public class DataBaseIndexingApplication {
     }
   }
 
-  public static void translateBookDocuments() {
+  public static void convertBookToBookDocument() {
     bookDocs = new ArrayList<>();
     BookDocument doc;
 
-    log.info("Start translation...");
+    log.info("Start converting...");
     long start = System.currentTimeMillis();
     for (Book book : books) {
       doc = BookDocument.of(
         book.getIsbnThirteenNo(),
         book.getTitleName(),
-        morphTokenizer.chosungTokenizer(book.getTitleName()),
-        morphTokenizer.jamoTokenizer(book.getTitleName()),
-        morphTokenizer.convertKoreanToEnglish(book.getTitleName()),
+        morphTokenizer.tokenizer(book.getTitleName(), HanguelJamoType.CHOSUNG),
+        morphTokenizer.tokenizer(book.getTitleName(), HanguelJamoType.JAMO),
+        morphTokenizer.tokenizer(book.getTitleName(), HanguelJamoType.KORTOENG),
         book.getAuthorName(),
         book.getPublicationYear()
       );

@@ -23,6 +23,7 @@ public class HangulJamoMorphTokenizer {
       "ho", "hl", "y", "n", "nj", "np", "nl", "b", "m", "ml", "l"};
   private static String[] JONGSUNG_EN = {"", "r", "R", "rt", "s", "sw", "sg", "e", "f", "fr", "fa",
           "fq", "ft", "fx", "fv", "fg", "a", "q", "qt", "t", "T", "d", "w", "c", "z", "x", "v", "g"};
+  // https://www.unicode.org/charts/
   private static final char CHOSUNG_BEGIN_UNICODE = 0x3131;
   private static final char CHOSUNG_END_UNICODE = 0x314E;
   private static final char HANGUEL_BEGIN_UNICODE = 0xAC00;
@@ -35,9 +36,9 @@ public class HangulJamoMorphTokenizer {
   private static final char ENGLISH_UPPER_END_UNICODE = 0x007A;
   private static final char WHITESPACE_UNICODE = 0x0020;
   private volatile static HangulJamoMorphTokenizer hangulJamoMorphTokenizer;
-  private static String[] LETTER_EN = {"r", "R", "rt", "s", "sw", "sg", "e", "E", "f", "fr", "fa",
-      "fq", "ft", "fx", "fv", "fg", "a", "q", "Q", "qt", "t", "T", "d", "w", "W", "c", "z", "x",
-      "v", "g"};
+//  private static String[] LETTER_EN = {"r", "R", "rt", "s", "sw", "sg", "e", "E", "f", "fr", "fa",
+//      "fq", "ft", "fx", "fv", "fg", "a", "q", "Q", "qt", "t", "T", "d", "w", "W", "c", "z", "x",
+//      "v", "g"};
 
   private HangulJamoMorphTokenizer() {
   }
@@ -54,20 +55,15 @@ public class HangulJamoMorphTokenizer {
   }
 
   private static boolean isPossibleCharacter(char c) {
-    if (((c >= NUMBER_BEGIN_UNICODE && c <= NUMBER_END_UNICODE)
-        || (c >= ENGLISH_UPPER_BEGIN_UNICODE && c <= ENGLISH_UPPER_END_UNICODE)
-        || (c >= ENGLISH_LOWER_BEGIN_UNICODE && c <= ENGLISH_LOWER_END_UNICODE)
-        || (c >= HANGUEL_BEGIN_UNICODE && c <= HANGUEL_END_UNICODE)
-        || (c >= CHOSUNG_BEGIN_UNICODE && c <= CHOSUNG_END_UNICODE)
-        || c == WHITESPACE_UNICODE)
-    ) {
-      return true;
-    } else {
-      return false;
-    }
+      return (c >= NUMBER_BEGIN_UNICODE && c <= NUMBER_END_UNICODE)
+              || (c >= ENGLISH_UPPER_BEGIN_UNICODE && c <= ENGLISH_UPPER_END_UNICODE)
+              || (c >= ENGLISH_LOWER_BEGIN_UNICODE && c <= ENGLISH_LOWER_END_UNICODE)
+              || (c >= HANGUEL_BEGIN_UNICODE && c <= HANGUEL_END_UNICODE)
+              || (c >= CHOSUNG_BEGIN_UNICODE && c <= CHOSUNG_END_UNICODE)
+              || c == WHITESPACE_UNICODE;
   }
 
-  public String tokenizer(String source, String jamoType) {
+  public String tokenizer(String source, HanguelJamoType jamoType) {
     /*
     [분리 기본 공식]
     초성 = ( ( (글자 - 0xAC00) - (글자 - 0xAC00) % 28 ) ) / 28 ) / 21
@@ -78,15 +74,22 @@ public class HangulJamoMorphTokenizer {
     각 index 정보는 CHOSUNG, JUNGSUNG, JONGSUNG char[]에 정의한 index 입니다.
     하지만 아래 코드에서는 원문이 필요 없기 때문에 합치기 위한 로직은 포함 되어 있지 않습니다.
     */
-    String jamo = switch (jamoType) {
-      case "CHOSUNG" -> chosungTokenizer(source);
-      case "JUNGSUNG" -> jungsungTokenizer(source);
-      case "JONGSUNG" -> jongsungTokenizer(source);
-      case "KORTOENG" -> convertKoreanToEnglish(source);
-      default -> jamoTokenizer(source);
-    };
+    // 한글을 포함하지 않았다면, tokenizing에서 제외
+    if (!containsKorean(source)) {
+      return null;
+    }
 
-    return jamo;
+    return switch (jamoType) {
+      case CHOSUNG -> chosungTokenizer(source);
+      case JUNGSUNG -> jungsungTokenizer(source);
+      case JONGSUNG -> jongsungTokenizer(source);
+      case KORTOENG -> convertKoreanToEnglish(source);
+      case JAMO -> jamoTokenizer(source);
+    };
+  }
+
+  private boolean containsKorean(String text) {
+    return text != null && text.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
   }
 
   public String jamoTokenizer(String source) {
@@ -165,29 +168,14 @@ public class HangulJamoMorphTokenizer {
   }
 
   public String chosungDoubleToSingle(String chosung) {
-    String single = "";
-
-    switch (chosung) {
-      case "ㄲ" :
-        single = "ㄱㄱ";
-        break;
-      case "ㄸ" :
-        single = "ㄷㄷ";
-        break;
-      case "ㅃ" :
-        single = "ㅂㅂ";
-        break;
-      case "ㅆ" :
-        single = "ㅅㅅ";
-        break;
-      case "ㅉ" :
-        single = "ㅈㅈ";
-        break;
-      default :
-        single = chosung;
-    }
-
-    return single;
+    return switch (chosung) {
+        case "ㄲ" -> "ㄱㄱ";
+        case "ㄸ" -> "ㄷㄷ";
+        case "ㅃ" -> "ㅂㅂ";
+        case "ㅆ" -> "ㅅㅅ";
+        case "ㅉ" -> "ㅈㅈ";
+        default -> chosung;
+    };
   }
 
   public String jungsungTokenizer(String source) {
