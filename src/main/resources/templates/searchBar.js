@@ -84,16 +84,34 @@ function addAutoCompleteElement(autoCompleteList, inp) {
     for (let i = 0; i < arr.length; i++) {
         /* element에 대응되는 DIV 생성 */
         let b = document.createElement("DIV");
-        // TODO : 해당 부분 로직 변경 필요
-        /* 입력 값의 길이 만큼 각 element의 글자 강조 */
-        b.innerHTML = "<strong>" + arr[i].substr(0, inputVal.length) + "</strong>";
-        b.innerHTML += arr[i].substr(inputVal.length);
+        b.className = "autocomplete-item";
+
+        // 왼쪽 div
+        let titleDiv = document.createElement("DIV");
+        titleDiv.className = "title"
+        // 오른쪽 div
+        let authorDiv = document.createElement("DIV");
+        authorDiv.className = "author"
+
+        // 왼쪽에는 책의 제목
+        titleDiv.innerHTML = arr[i].highlightTitle;
+        // 오른쪽에는 글쓴이
+        authorDiv.innerHTML =  arr[i].author;
+
+        // 왼쪽과 오른쪽 div를 부모 div에 추가
+        b.appendChild(titleDiv);
+        b.appendChild(authorDiv);
+
         /* 해당 element를 선택시에 input 태그에 선택한 값이 입력되도록 해당 태그를 추가 */
-        b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+        let hiddenInput = document.createElement("input");
+        hiddenInput.setAttribute("type", "hidden");
+        hiddenInput.setAttribute("value", arr[i].title);
+        b.appendChild(hiddenInput);
+
         /* 클릭 시 */
         b.addEventListener("click", function (e) {
             /* 검색 창을 해당 값으로 변경 */
-            inp.value = this.getElementsByTagName("input")[0].value;
+            inp.value = this.querySelector("input").value;
             /* 자동 완성 리스트 삭제 */
             closeAllLists();
         });
