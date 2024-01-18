@@ -3,6 +3,8 @@ import { createElement } from './createElement.js';
 
 let suggestions = [];
 let currentFocus = -1;
+const autocompleteSearchSize = 10;
+const tempListSearchSize = 24;
 
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('clearSearchBar').onclick = function() { document.getElementById('inputSearchText').value = ''; };
