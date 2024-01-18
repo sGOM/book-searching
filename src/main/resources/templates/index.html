@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="sGOM">
+  <title>Search Page</title>
+  <link rel="stylesheet" href="../static/css/style.css">
+  <link rel="stylesheet" href="../static/css/ui.css">
+  <link rel="stylesheet" href="../static/css/searchBar.css">
+  <link rel="stylesheet" href="../static/css/bookList.css">
+</head>
+<body>
+
+<div id="searchBarWrap">
+  <div class="icon"></div>
+  <div class="input">
+    <input id="inputSearchText" type="text" placeholder="Search">
+  </div>
+  <span class="clear" id="clearSearchBar"></span>
+</div>
+
+<section id="booksListWrap">
+  <div class="booksSecTop">
+    <div class="booksSecTit"></div>
+  </div>
+  <div class="booksSecArea">
+    <ul id="booksList" class="bLi">
+    </ul>
+  </div>
+</section>
+
+<div class="booksPagination">
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="module" src="searchBar.js"></script>
+<script type="module" src="bookList.js"></script>
+</body>
+</html>
