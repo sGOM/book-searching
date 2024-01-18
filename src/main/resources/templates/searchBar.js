@@ -1,3 +1,4 @@
+import { searchBooksRequest } from './request.js';
 let suggestions = [];
 let currentFocus = -1;
 
@@ -5,18 +6,12 @@ $(document).ready(function () {
     $("#mysearch").keyup(async function () {
         const keyword = $("#mysearch").val();
 
-        try {
-            const res = await $.ajax({
-                url: 'http://localhost:8080/books/search',
-                type: 'GET',
-                data: { keyword: keyword },
-            });
 
-            suggestions = res;
 
             if (suggestions.length <= currentFocus) {
                 currentFocus = 0;
             }
+            suggestions = await searchBooksRequest(keyword, autocompleteSearchSize);
 
             closeAllLists();
 
