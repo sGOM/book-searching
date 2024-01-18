@@ -1,0 +1,164 @@
+#booksListWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    width: 100%;
+    min-width: 800px;
+    background-color: #f5f5f5;
+}
+
+.booksSecTop {
+    width: 100%;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+.booksSecTit {
+    height: 50px;
+    line-height: 50px;
+    margin-left: 12px;
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+    text-align: left;
+}
+
+.booksSecArea ul {
+    list-style-type: none;
+    padding-left:0;
+    background-color: #fff;
+    width: 100%;
+}
+
+.booksSecArea li {
+    border-bottom:1px solid #ccc;
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    height: 150px;
+    width: 100%;
+}
+
+.bLi {
+    line-height: 0;
+    font-size: 0;
+}
+
+.bLi li .item-unit {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.bLi .item-unit {
+    line-height: 1.3em;
+    font-size: 12px;
+}
+
+.bLi .item-unit .item-img {
+    display: table-cell;
+    width: 125px;
+    vertical-align: top;
+    background-color: #ec5353 /* 임시 색상 */
+}
+
+.bLi .item-unit .item-info {
+    display: table-cell;
+    padding-left: 20px;
+    vertical-align: top;
+}
+
+.bLi .item-info {
+    text-align: left;
+}
+
+.bLi li .item-info .item-title {
+    max-height: none;
+    line-height: 20px;
+    font-size: 15px;
+}
+
+.bLi li .item-info .item-title .book-title {
+    color: #333;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.bLi li .item-info .info-pub-grp .info-auth {
+    position: relative;
+    display: inline;
+    vertical-align: top;
+}
+
+.bLi li .item-info .info-pub-grp {
+    display: block;
+    margin-top: 7px;
+    min-height: 16px;
+    line-height: 16px;
+    color: #999;
+}
+
+.bLi li .item-info .info-price {
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-lines: multiple;
+    flex-wrap: wrap;
+}
+
+.bLi .item-info .info-price {
+    margin-top: 7px;
+    line-height: 20px;
+    color: #333;
+}
+
+.bLi li .item-info .info-pub-grp+.info-price {
+    margin-top: 10px;
+}
+
+.bLi li .item-info .info-price .txt-num {
+    -ms-flex-order: 1;
+    order: 1;
+}
+
+.bLi .item-info .info-price .txt-num {
+    display: -moz-inline-stack;
+    display: inline-block;
+    zoom: 1;
+    *display: inline;
+    text-align: left;
+    vertical-align: bottom;
+    line-height: 20px;
+}
+
+.bLi li .item-info .info-price .txt-num .book-price {
+    color: #000;
+    font-size: 19px;
+    vertical-align: -1px;
+}
+
+.book-price {
+    font-weight: normal !important;
+}
+
+.bLi li .item-btn-col {
+    display: table-cell;
+    padding-left: 20px;
+    width: 145px;
+    box-sizing: border-box;
+}
+
+.bLi li .item-btn-col .btn-c+.btn-c {
+    margin: 5px 0 0 0;
+}
+
+.bLi li .item-btn-col .btn-c {
+    display: block;
+    margin: 0;
+}
+
+.bLi li .item-btn-col .btn-c .btn-wrap {
+    display: block;
+}
