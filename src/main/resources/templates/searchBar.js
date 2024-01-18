@@ -1,4 +1,6 @@
 import { searchBooksRequest } from './request.js';
+import { createElement } from './createElement.js';
+
 let suggestions = [];
 let currentFocus = -1;
 
@@ -17,7 +19,8 @@ $(document).ready(function () {
 
             if (!keyword) return false;
 
-            const autoCompleteList = createAutoCompleteList();
+            const autoCompleteList = createElement("ul", ["autocomplete-items"], "autocomplete-list");
+
             this.parentNode.appendChild(autoCompleteList);
             addAutoCompleteElements(autoCompleteList, this);
 
@@ -48,27 +51,23 @@ function updateAutoCompleteList() {
                 }
             }
         }
-    });
-}
-
-function createAutoCompleteList() {
-    const autoCompleteList = document.createElement("DIV");
-    autoCompleteList.setAttribute("id", "mysearch-autocomplete-list");
-    autoCompleteList.setAttribute("class", "autocomplete-items");
-    return autoCompleteList;
+    }
 }
 
 function addAutoCompleteElements(autoCompleteList, input) {
     suggestions.forEach(suggestion => {
-        const item = createAutoCompleteElement("autocomplete-item", null);
+        const item = createElement("li", ["autocomplete-item"]);
 
-        const titleDiv = createAutoCompleteElement("title", suggestion.highlightTitle);
-        const authorDiv = createAutoCompleteElement("author", suggestion.author);
+        const titleDiv = createElement("div", ["title"]);
+        titleDiv.innerHTML = suggestion.highlightTitle;
+        const authorDiv = createElement("div", ["author"]);
+        authorDiv.innerHTML = suggestion.author;
 
         item.appendChild(titleDiv);
         item.appendChild(authorDiv);
 
-        const hiddenInput = createHiddenInput(suggestion.title);
+        const hiddenInput = createElement("input", null, null, "hidden");
+        hiddenInput.value = suggestion.title;
         item.appendChild(hiddenInput);
 
         item.addEventListener("click", function () {
@@ -80,35 +79,21 @@ function addAutoCompleteElements(autoCompleteList, input) {
     });
 }
 
-function createAutoCompleteElement(className, innerHTML) {
-    const div = document.createElement("DIV");
-    div.setAttribute("class", className);
-    div.innerHTML = innerHTML;
-    return div;
-}
-
-function createHiddenInput(value) {
-    const hiddenInput = document.createElement("input");
-    hiddenInput.setAttribute("type", "hidden");
-    hiddenInput.setAttribute("value", value);
-    return hiddenInput;
-}
-
 function changeFocus(items) {
     removeFocus(items);
 
     if (currentFocus >= items.length) currentFocus = 0;
     if (currentFocus < 0) currentFocus = (items.length - 1);
 
-    items[currentFocus].classList.add("autocomplete-active");
+    items[currentFocus].classList.add("autocomplete-item-active");
 }
 
 function removeFocus(items) {
-    Array.from(items).forEach(item => item.classList.remove("autocomplete-active"));
+    Array.from(items).forEach(item => item.classList.remove("autocomplete-item-active"));
 }
 
 function closeAllLists(el) {
-    const input = document.getElementById("mysearch");
+    const input = document.getElementById("inputSearchText");
     const autoCompleteLists = document.getElementsByClassName("autocomplete-items");
 
     Array.from(autoCompleteLists).forEach(list => {
