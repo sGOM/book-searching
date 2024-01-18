@@ -7,17 +7,21 @@
   <meta name="author" content="sGOM">
   <title>Search Page</title>
   <link rel="stylesheet" href="../static/css/style.css">
+  <link rel="stylesheet" href="../static/css/searchBar.css">
 </head>
 <body>
-  <div class="search">
+
+  <div id="searchBarWrap">
     <div class="icon"></div>
     <div class="input">
-      <input id="mysearch" type="text" placeholder="Search">
+      <input id="inputSearchText" type="text" placeholder="Search">
     </div>
-    <span class="clear" onclick="document.getElementById('mysearch').value = ''"></span>
+    <span class="clear" id="clearSearchBar"></span>
+  </div>
+    </div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="searchBar.js"></script>
+  <script type="module" src="searchBar.js"></script>
 </body>
 </html>

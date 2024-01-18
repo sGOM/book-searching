@@ -20,8 +20,8 @@ public class BookController {
     
     @GetMapping("/search")
     @ResponseBody
-    public List<BookSearchResponse> getSearch(@RequestParam(required = false) String keyword) {
-        return bookService.searchBookTitles(keyword);
+    public List<BookSearchResponse> getSearch(@RequestParam(required = false) String keyword, @RequestParam(required = false) Integer size) {
+        return bookService.searchBookTitles(keyword, size);
     }
 
 }

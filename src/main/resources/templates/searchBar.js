@@ -1,102 +1,92 @@
+import { searchBooksRequest } from './request.js';
+import { createElement } from './createElement.js';
+
 let suggestions = [];
 let currentFocus = -1;
+const autocompleteSearchSize = 10;
+const tempListSearchSize = 24;
 
-$(document).ready(function () {
-    $("#mysearch").keyup(async function () {
-        const keyword = $("#mysearch").val();
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('clearSearchBar').onclick = function() { document.getElementById('inputSearchText').value = ''; };
 
-        try {
-            const res = await $.ajax({
-                url: 'http://localhost:8080/books/search',
-                type: 'GET',
-                data: { keyword: keyword },
-            });
+    document.getElementById('inputSearchText').addEventListener('keyup', async function (e) {
+        const keyword = document.getElementById('inputSearchText').value;
 
-            suggestions = res;
+        if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) {
 
-            if (suggestions.length <= currentFocus) {
-                currentFocus = 0;
-            }
+            suggestions = await searchBooksRequest(keyword, autocompleteSearchSize);
+            currentFocus = -1;
 
             closeAllLists();
 
             if (!keyword) return false;
 
-            const autoCompleteList = createAutoCompleteList();
+            const autoCompleteList = createElement("ul", ["autocomplete-items"], "autocomplete-list");
+
             this.parentNode.appendChild(autoCompleteList);
             addAutoCompleteElements(autoCompleteList, this);
+        } else if (["Enter"].includes(e.key)) {
+            closeAllLists();
+            window.searchResult = await searchBooksRequest(keyword, tempListSearchSize);
+        } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
+            updateFocus(e);
+            const focusedItem = document.getElementsByClassName('autocomplete-item-active')[0];
+            if (focusedItem) {
+                const focusedItemTitleElement = focusedItem.querySelector("div.title");
 
-            updateAutoCompleteList();
-        } catch (err) {
-            console.log('Error:', err);
-        }
-    });
-});
-
-function updateAutoCompleteList() {
-    const inp = document.getElementById("mysearch");
-
-    inp.addEventListener("keydown", function (e) {
-        const autoCompleteList = document.getElementById("mysearch-autocomplete-list");
-
-        if (autoCompleteList) {
-            const items = autoCompleteList.getElementsByTagName("div");
-
-            if (["ArrowDown", "ArrowUp"].includes(e.key)) {
-                e.preventDefault();
-                currentFocus += (e.key === "ArrowDown") ? 1 : -1;
-                changeFocus(items);
-            } else if (e.key === "Enter") {
-                e.preventDefault();
-                if (currentFocus > -1) {
-                    items[currentFocus].click();
+                if (focusedItemTitleElement) {
+                    $(this).val(focusedItemTitleElement.textContent);
                 }
             }
         }
     });
-}
+});
 
-function createAutoCompleteList() {
-    const autoCompleteList = document.createElement("DIV");
-    autoCompleteList.setAttribute("id", "mysearch-autocomplete-list");
-    autoCompleteList.setAttribute("class", "autocomplete-items");
-    return autoCompleteList;
+function updateFocus(e) {
+    const autoCompleteList = document.getElementById("autocomplete-list");
+
+    if (autoCompleteList) {
+        const autoCompleteList = document.getElementById("autocomplete-list");
+        const autocompleteItems = autoCompleteList.querySelectorAll("li.autocomplete-item");
+
+        if (["ArrowDown", "ArrowUp"].includes(e.key)) {
+            e.preventDefault();
+            currentFocus += (e.key === "ArrowDown") ? 1 : -1;
+            changeFocus(autocompleteItems);
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            if (currentFocus > -1) {
+                autocompleteItems[currentFocus].click();
+            }
+        }
+    }
 }
 
 function addAutoCompleteElements(autoCompleteList, input) {
     suggestions.forEach(suggestion => {
-        const item = createAutoCompleteElement("autocomplete-item", null);
+        const item = createElement("li", ["autocomplete-item"]);
 
-        const titleDiv = createAutoCompleteElement("title", suggestion.highlightTitle);
-        const authorDiv = createAutoCompleteElement("author", suggestion.author);
+        const titleDiv = createElement("div", ["title"]);
+        titleDiv.innerHTML = suggestion.highlightTitle;
+        const authorDiv = createElement("div", ["author"]);
+        authorDiv.innerHTML = suggestion.author;
 
         item.appendChild(titleDiv);
         item.appendChild(authorDiv);
 
-        const hiddenInput = createHiddenInput(suggestion.title);
+        const hiddenInput = createElement("input", null, null, "hidden");
+        hiddenInput.value = suggestion.title;
         item.appendChild(hiddenInput);
 
-        item.addEventListener("click", function () {
-            input.value = this.querySelector("input").value;
+        item.addEventListener("click", async function () {
+            const searchKeyword = this.querySelector("input").value;
+            input.value = searchKeyword;
+            window.searchResult = await searchBooksRequest(searchKeyword, tempListSearchSize);
             closeAllLists();
         });
 
         autoCompleteList.appendChild(item);
     });
-}
-
-function createAutoCompleteElement(className, innerHTML) {
-    const div = document.createElement("DIV");
-    div.setAttribute("class", className);
-    div.innerHTML = innerHTML;
-    return div;
-}
-
-function createHiddenInput(value) {
-    const hiddenInput = document.createElement("input");
-    hiddenInput.setAttribute("type", "hidden");
-    hiddenInput.setAttribute("value", value);
-    return hiddenInput;
 }
 
 function changeFocus(items) {
@@ -105,15 +95,15 @@ function changeFocus(items) {
     if (currentFocus >= items.length) currentFocus = 0;
     if (currentFocus < 0) currentFocus = (items.length - 1);
 
-    items[currentFocus].classList.add("autocomplete-active");
+    items[currentFocus].classList.add("autocomplete-item-active");
 }
 
 function removeFocus(items) {
-    Array.from(items).forEach(item => item.classList.remove("autocomplete-active"));
+    Array.from(items).forEach(item => item.classList.remove("autocomplete-item-active"));
 }
 
 function closeAllLists(el) {
-    const input = document.getElementById("mysearch");
+    const input = document.getElementById("inputSearchText");
     const autoCompleteLists = document.getElementsByClassName("autocomplete-items");
 
     Array.from(autoCompleteLists).forEach(list => {

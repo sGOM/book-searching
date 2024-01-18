@@ -37,15 +37,14 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public List<BookSearchResponse> searchBookTitles(String keyword) {
+    public List<BookSearchResponse> searchBookTitles(String keyword, Integer size) {
         final String BOOK_INDEX = "books";
         final String FIELD_NAME = "title";
-        final Integer SIZE = 10;
         final Float KEYWORD_BOOST_VALUE = 2f;
         final Float PHRASE_BOOST_VALUE = 1.5f;
         final Float LANGUAGE_BOOST_VALUE = 1.2f;
         final Float DEFAULT_BOOST_VALUE = 1f;
-        final Float PARTIAL_BOOST_VALUE = 0.3f;
+        final Float PARTIAL_BOOST_VALUE = 0.5f;
 
         String[] fieldSuffixes = containsKorean(keyword) ? new String[]{"", "_chosung", "_jamo"} : new String[]{"", "_engtokor"};
         Map<String, Float> boostValueByMultiFieldMap = Map.of(
@@ -68,7 +67,7 @@ public class BookService {
 
         SearchRequest searchRequest = new SearchRequest.Builder()
                 .index(BOOK_INDEX)
-                .size(SIZE)
+                .size(size)
                 .query(queryBuilder -> queryBuilder.disMax(disMaxQuery))
                 .highlight(highlight)
                 .build();
