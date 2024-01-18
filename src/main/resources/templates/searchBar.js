@@ -4,16 +4,16 @@ import { createElement } from './createElement.js';
 let suggestions = [];
 let currentFocus = -1;
 
-$(document).ready(function () {
-    $("#mysearch").keyup(async function () {
-        const keyword = $("#mysearch").val();
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('clearSearchBar').onclick = function() { document.getElementById('inputSearchText').value = ''; };
 
+    document.getElementById('inputSearchText').addEventListener('keyup', async function (e) {
+        const keyword = document.getElementById('inputSearchText').value;
 
+        if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) {
 
-            if (suggestions.length <= currentFocus) {
-                currentFocus = 0;
-            }
             suggestions = await searchBooksRequest(keyword, autocompleteSearchSize);
+            currentFocus = -1;
 
             closeAllLists();
 
@@ -23,32 +23,38 @@ $(document).ready(function () {
 
             this.parentNode.appendChild(autoCompleteList);
             addAutoCompleteElements(autoCompleteList, this);
+        } else if (["Enter"].includes(e.key)) {
+            closeAllLists();
+            window.searchResult = await searchBooksRequest(keyword, tempListSearchSize);
+        } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
+            updateFocus(e);
+            const focusedItem = document.getElementsByClassName('autocomplete-item-active')[0];
+            if (focusedItem) {
+                const focusedItemTitleElement = focusedItem.querySelector("div.title");
 
-            updateAutoCompleteList();
-        } catch (err) {
-            console.log('Error:', err);
+                if (focusedItemTitleElement) {
+                    $(this).val(focusedItemTitleElement.textContent);
+                }
+            }
         }
     });
 });
 
-function updateAutoCompleteList() {
-    const inp = document.getElementById("mysearch");
+function updateFocus(e) {
+    const autoCompleteList = document.getElementById("autocomplete-list");
 
-    inp.addEventListener("keydown", function (e) {
-        const autoCompleteList = document.getElementById("mysearch-autocomplete-list");
+    if (autoCompleteList) {
+        const autoCompleteList = document.getElementById("autocomplete-list");
+        const autocompleteItems = autoCompleteList.querySelectorAll("li.autocomplete-item");
 
-        if (autoCompleteList) {
-            const items = autoCompleteList.getElementsByTagName("div");
-
-            if (["ArrowDown", "ArrowUp"].includes(e.key)) {
-                e.preventDefault();
-                currentFocus += (e.key === "ArrowDown") ? 1 : -1;
-                changeFocus(items);
-            } else if (e.key === "Enter") {
-                e.preventDefault();
-                if (currentFocus > -1) {
-                    items[currentFocus].click();
-                }
+        if (["ArrowDown", "ArrowUp"].includes(e.key)) {
+            e.preventDefault();
+            currentFocus += (e.key === "ArrowDown") ? 1 : -1;
+            changeFocus(autocompleteItems);
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            if (currentFocus > -1) {
+                autocompleteItems[currentFocus].click();
             }
         }
     }
@@ -70,8 +76,10 @@ function addAutoCompleteElements(autoCompleteList, input) {
         hiddenInput.value = suggestion.title;
         item.appendChild(hiddenInput);
 
-        item.addEventListener("click", function () {
-            input.value = this.querySelector("input").value;
+        item.addEventListener("click", async function () {
+            const searchKeyword = this.querySelector("input").value;
+            input.value = searchKeyword;
+            window.searchResult = await searchBooksRequest(searchKeyword, tempListSearchSize);
             closeAllLists();
         });
 
