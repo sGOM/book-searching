@@ -1,5 +1,5 @@
 import { searchBooksRequest } from './request.js';
-import { createElement } from './createElement.js';
+import { createElement } from './utils.js';
 
 let suggestions = [];
 let currentFocus = -1;
