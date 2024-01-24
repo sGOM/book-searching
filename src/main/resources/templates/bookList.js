@@ -1,37 +1,44 @@
 import { createElement } from './utils.js';
 
-window.searchResult = null;
+export function createBooksListWrapHTML(data) {
+    const booksInfo = data.booksInfo;
+    const pageInfo = data.pageInfo;
+    const elements = [];
 
-document.addEventListener("DOMContentLoaded", function () {
-    function setSearchResult(newSearchResult) {
-        const booksListWrap = document.getElementById("booksListWrap");
-        const booksSecTit = booksListWrap.querySelector(".booksSecTit");
-        booksSecTit.textContent = "검색 결과: " + newSearchResult.length;
+    elements.push(createBooksSecTopDiv(pageInfo.totalElements));
+    elements.push(createBooksSecAreaDiv(booksInfo));
+    elements.push(createBooksPaginationDiv(pageInfo));
 
-        removeListItems(booksList);
-        createBookListItems(newSearchResult);
-    }
-
-    Object.defineProperty(window, "searchResult", {
-        set: function(newSearchResult) {
-            setSearchResult(newSearchResult);
-        }
-    });
-});
-
-function removeListItems(listElement) {
-    Array.from(listElement).forEach(list => {
-        list.parentNode.removeChild(list);
-    });
+    return elements;
 }
 
-function createBookListItems(dataList) {
-    const booksList = document.getElementById("booksList");
+function createBooksSecTopDiv(totalElements) {
+    const booksSecTopDiv = createElement("div", ["booksSecTop"]);
+    const booksSecTitDiv = createElement("div", ["booksSecTit"]);
 
-    Array.from(dataList).forEach(data => {
+    booksSecTitDiv.textContent = "검색 결과: " + totalElements;
+
+    booksSecTopDiv.appendChild(booksSecTitDiv);
+
+    return booksSecTopDiv;
+}
+
+function createBooksSecAreaDiv(booksInfo) {
+    const booksSecAreaDiv = createElement("div", ["booksSecArea"]);
+    const booksListUl = createElement("ul", ["bLi"], "booksList");
+
+    fillBooksList(booksListUl, booksInfo);
+
+    booksSecAreaDiv.appendChild(booksListUl);
+
+    return booksSecAreaDiv;
+}
+
+function fillBooksList(booksListUl, booksInfo) {
+    Array.from(booksInfo).forEach(bookInfo => {
         const booksItem = createElement("li");
-        booksItem.appendChild(createItemUnit(data));
-        booksList.appendChild(booksItem);
+        booksItem.appendChild(createItemUnit(bookInfo));
+        booksListUl.appendChild(booksItem);
     });
 }
 
@@ -88,4 +95,29 @@ function createItemInfoDiv(data) {
     itemInfoDiv.appendChild(infoPriceDiv);
 
     return itemInfoDiv;
+}
+
+function createBooksPaginationDiv(pageInfo) {
+    const barNumberList = pageInfo.barNumberList;
+    const currentPageNum = pageInfo.page;
+
+    const booksPaginationDiv = createElement("div", ["booksPagination"]);
+    const uiPaginationDiv = createElement("div", ["ui-pagination"]);
+
+    Array.from(barNumberList).forEach(barNum => {
+        let paginationBtn;
+        if (barNum == currentPageNum) {
+            paginationBtn = createElement("strong", ["num"]);
+            paginationBtn.innerHTML = barNum;
+        } else {
+            paginationBtn = createElement("a", ["num"]);
+            paginationBtn.title = barNum;
+            paginationBtn.innerHTML = barNum;
+        }
+        uiPaginationDiv.appendChild(paginationBtn);
+    });
+
+    booksPaginationDiv.appendChild(uiPaginationDiv);
+
+    return booksPaginationDiv;
 }
