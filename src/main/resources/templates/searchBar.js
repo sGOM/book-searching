@@ -1,4 +1,4 @@
-import { searchBooksRequest } from './request.js';
+import { requestAutocompleteSuggestions, requestBookSearch } from './request.js';
 import { createElement } from './utils.js';
 
 let suggestions = [];
@@ -14,7 +14,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) {
 
-            suggestions = await searchBooksRequest(keyword, autocompleteSearchSize);
+            const data = await requestAutocompleteSuggestions(keyword);
+            const booksInfo = await data.booksInfo;
+            suggestions = booksInfo;
+
             currentFocus = -1;
 
             closeAllLists();
@@ -27,7 +30,11 @@ document.addEventListener('DOMContentLoaded', function () {
             addAutoCompleteElements(autoCompleteList, this);
         } else if (["Enter"].includes(e.key)) {
             closeAllLists();
-            window.searchResult = await searchBooksRequest(keyword, tempListSearchSize);
+            requestBookSearch({
+                keyword: keyword,
+                page: 1,
+                size: tempListSearchSize
+            });
         } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
             updateFocus(e);
             const focusedItem = document.getElementsByClassName('autocomplete-item-active')[0];
@@ -81,7 +88,11 @@ function addAutoCompleteElements(autoCompleteList, input) {
         item.addEventListener("click", async function () {
             const searchKeyword = this.querySelector("input").value;
             input.value = searchKeyword;
-            window.searchResult = await searchBooksRequest(searchKeyword, tempListSearchSize);
+            requestBookSearch({
+                keyword: searchKeyword,
+                page: 1,
+                size: tempListSearchSize
+            });
             closeAllLists();
         });
 
