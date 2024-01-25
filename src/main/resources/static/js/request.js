@@ -1,9 +1,9 @@
-import { createBooksListWrapHTML } from './bookList.js';
+import { createBooksListWrapHTML } from './bookSection.js';
 
 export async function requestAutocompleteSuggestions(keyword) {
     try {
         const res = await $.ajax({
-            url: 'http://localhost:8080/books/search',
+            url: 'http://localhost:8080/search',
             type: 'GET',
             data: {
                 keyword: keyword,
@@ -20,11 +20,11 @@ export async function requestAutocompleteSuggestions(keyword) {
 export async function requestBookSearch(paramsObject) {
     let params = createQueryString(paramsObject);
 
-    //window.history.replaceState({ params: params }, '', '/books/search?' + params);
+    window.history.replaceState({ params: params }, '', '/search?' + params);
 
     try {
         const res = await $.ajax({
-            url: 'http://localhost:8080/books/search?' + params,
+            url: 'http://localhost:8080/search?' + params,
             type: 'GET',
             success: function (data) {
                 $('#booksListWrap').html(createBooksListWrapHTML(data));
