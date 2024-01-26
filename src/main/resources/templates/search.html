@@ -1,33 +1,16 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="">
   <meta name="author" content="sGOM">
   <title>Search Page</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-  <link rel="stylesheet" href="/static/css/ui.css">
-  <link rel="stylesheet" href="/static/css/searchBar.css">
-  <link rel="stylesheet" href="/static/css/bookSection.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/ui.css">
 </head>
 <body>
-
-<div id="searchBarWrap">
-  <div class="icon"></div>
-  <div class="input">
-    <input id="inputSearchText" type="text" placeholder="Search">
-  </div>
-  <span class="clear" id="clearSearchBar"></span>
-</div>
-
-<div class="booksSec">
-  <section id="booksListWrap"></section>
-</div>
-
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script type="module" src="/static/js/searchBar.js"></script>
-<script type="module" src="/static/js/bookSection.js"></script>
+  <div th:replace="fragments/searchBar"></div>
+  <div th:replace="fragments/bookSection"></div>
 </body>
 </html>
