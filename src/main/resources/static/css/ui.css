@@ -59,3 +59,41 @@
     text-align: center;
     vertical-align: top;
 }
+
+.ui-pagination {
+    clear: both;
+    text-align: center;
+    line-height: 0;
+    font-size: 0;
+}
+
+.ui-pagination strong.num {
+    border: solid 1px #6699cc;
+    color: #fff;
+    background-color: #6699cc;
+    cursor: pointer;
+}
+
+.ui-pagination .num {
+    display: inline-block;
+    margin: 0 2px;
+    padding: 0 3px;
+    width: auto !important;
+    min-width: 22px;
+    _width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 12px;
+    vertical-align: top;
+    border: 1px solid #d6d6d6;
+    border-radius: 3px;
+    color: #999;
+    background-color: #fff;
+
+    display: -moz-inline-stack;
+    display: inline-block;
+    zoom: 1;
+    *display: inline;
+    overflow: hidden;
+    text-align: center;
+}
