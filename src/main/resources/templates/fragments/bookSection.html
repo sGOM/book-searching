@@ -43,6 +43,20 @@
                     </li>
                 </ul>
             </div>
+            <div class="booksPagination">
+                <div class="ui-pagination">
+                    <th:block th:each="barNum : ${data.pageInfo.barNumberList}">
+                        <th:block th:if="${barNum == data.pageInfo.page}">
+                            <strong class="num" th:text="${barNum}"></strong>
+                        </th:block>
+                        <th:block th:unless="${barNum == data.pageInfo.page}">
+                            <a class="num" th:title="${barNum}" th:text="${barNum}" th:href="@{/search(
+                            keyword=${data.keyword},
+                            page=${barNum})}"></a>
+                        </th:block>
+                    </th:block>
+                </div>
+            </div>
         </section>
     </div>
 </body>
