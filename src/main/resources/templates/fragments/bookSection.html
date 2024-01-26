@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="sGOM">
+    <title>book Section</title>
+    <link rel="stylesheet" href="/css/bookSection.css">
+</head>
+<body>
+    <div class="booksSec">
+        <section id="booksListWrap">
+            <div class="booksSecTop">
+                <div class="booksSecTit" th:text="'검색 결과: ' + ${data.pageInfo != null ? data.pageInfo.totalElements : 'N/A'}"></div>
+            </div>
+            <div class="booksSecArea">
+                <ul id="booksList" class="bLi">
+                    <li th:each="bookInfo : ${data.booksInfo}">
+                        <div class="item-unit">
+                            <div class="item-img"></div>
+                            <div class="item-info">
+                                <div class="info-row info-title">
+                                    <a class="book-title" th:text="${bookInfo.title}"></a>
+                                </div>
+                                <div class="info-row info-pub-grp">
+                                    <span class="auth-pub info-auth" th:text="${bookInfo.author}"></span>
+                                </div>
+                                <div class="info-row info-price">
+                                    <strong class="txt-num">
+                                        <em class="book-price"></em>
+                                    </strong>
+                                </div>
+                            </div>
+                            <div class="item-btn-col">
+                                <a class="btn-c btn-sBlue">
+                                    <span class="btn-wrap">
+                                        <em class="txt">바로구매</em>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

@@ -26,9 +26,11 @@ export async function requestBookSearch(paramsObject) {
         const res = await $.ajax({
             url: 'http://localhost:8080/search?' + params,
             type: 'GET',
-            success: function (data) {
-                $('#booksListWrap').html(createBooksListWrapHTML(data));
-            }
+            success: function(res) {
+                    document.open();
+                    document.write(res);
+                    document.close();
+                }
         });
     } catch (err) {
         console.log('Error:', err);
