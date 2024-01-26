@@ -14,8 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) {
 
             const data = await requestAutocompleteSuggestions(keyword);
-            const booksInfo = await data.booksInfo;
-            suggestions = booksInfo;
+            suggestions = data;
 
             currentFocus = -1;
 

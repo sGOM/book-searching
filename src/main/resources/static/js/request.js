@@ -1,14 +1,10 @@
-import { createBooksListWrapHTML } from './bookSection.js';
-
 export async function requestAutocompleteSuggestions(keyword) {
     try {
         const res = await $.ajax({
-            url: 'http://localhost:8080/search',
+            url: 'http://localhost:8080/search/auto-complete',
             type: 'GET',
             data: {
-                keyword: keyword,
-                page: 1,
-                size: 10
+                keyword: keyword
             },
         });
         return res;
