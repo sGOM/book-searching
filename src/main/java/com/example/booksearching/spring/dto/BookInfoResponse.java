@@ -13,11 +13,12 @@ public record BookInfoResponse(
         String title,
         String highlightTitle,
         String author,
-        Year publishedYear
+        Year publishedYear,
+        Integer price
 ) {
 
-    public static BookInfoResponse of(String isbn, String title, String highlightTitle, String author, Year publishedYear) {
-        return new BookInfoResponse(isbn, title, highlightTitle, author, publishedYear);
+    public static BookInfoResponse of(String isbn, String title, String highlightTitle, String author, Year publishedYear, Integer price) {
+        return new BookInfoResponse(isbn, title, highlightTitle, author, publishedYear, price);
     }
 
     public static BookInfoResponse from(Hit<BookDocument> hit) {
@@ -36,7 +37,8 @@ public record BookInfoResponse(
                 doc.getTitle(),
                 firstHighlight,
                 doc.getAuthor(),
-                Year.of(doc.getPublished_year())
+                Year.of(doc.getPublished_year()),
+                doc.getPrice()
         );
     }
 

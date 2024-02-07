@@ -1,5 +1,9 @@
 package com.example.booksearching.elasticsearch.analysis;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HangulJamoMorphTokenizer {
   // Mapping Hangul to Unicode
   private static final char[] CHOSUNG =
@@ -39,9 +43,6 @@ public class HangulJamoMorphTokenizer {
 //  private static String[] LETTER_EN = {"r", "R", "rt", "s", "sw", "sg", "e", "E", "f", "fr", "fa",
 //      "fq", "ft", "fx", "fv", "fg", "a", "q", "Q", "qt", "t", "T", "d", "w", "W", "c", "z", "x",
 //      "v", "g"};
-
-  private HangulJamoMorphTokenizer() {
-  }
 
   public static HangulJamoMorphTokenizer getInstance() {
     if (hangulJamoMorphTokenizer == null) {

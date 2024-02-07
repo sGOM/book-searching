@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,25 +34,30 @@ public class Book {
     private String author;
 //    @Column(length = 200)
 //    private String publisher;
+    @Column
+    @Min(value = 0, message = "가격은 0 이상이어야 합니다")
+    private Integer price;
     @Convert(converter = YearToIntConverter.class)
     private Year publishedYear;
 
-    private Book(String id, String name, String kdcLabel, String kdcCode, String author, Year publishedYear) {
+    private Book(String id, String name, String kdcLabel, String kdcCode, String author, Integer price, Year publishedYear) {
         this.id = id;
         this.name = name;
         this.kdcLabel = kdcLabel;
         this.kdcCode = kdcCode;
         this.author = author;
+        this.price = price;
         this.publishedYear = publishedYear;
     }
 
-    public static Book of(String id, String name, String kdcLabel, String kdcCode, String author, Year publishedYear) {
+    public static Book of(String id, String name, String kdcLabel, String kdcCode, String author, Integer price, Year publishedYear) {
         return new Book(
                 Optional.of(id).get(),
                 Optional.of(name).get(),
                 Optional.of(kdcLabel).get(),
                 Optional.of(kdcCode).get(),
                 author,
+                price,
                 publishedYear
         );
     }

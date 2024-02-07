@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.Optional;
-
 @Setter
 @Getter
 @ToString
@@ -13,23 +11,29 @@ public class Book {
     private String isbnThirteenNo;
     private String titleName;
     private String authorName;
-    private int publicationYear;
+    private Integer publicationYear;
+    private Integer price;
 
-    private Book(String isbnThirteenNo, String titleName, String authorName, int publicationYear) {
-        this.isbnThirteenNo = Optional.of(isbnThirteenNo)
-                .filter(s -> s.length() == 13)
-                .orElseThrow(() -> new IllegalArgumentException("String length is not 13"));
-        this.titleName = Optional.of(titleName).get();
+    private Book(String isbnThirteenNo, String titleName, String authorName, Integer publicationYear, Integer price) {
+        if (isbnThirteenNo.length() != 13) throw new IllegalArgumentException("isbnThirteenNo length must be 13");
+        if (titleName == null) throw new NullPointerException("titleName must be notnull");
+        if (publicationYear == null) throw new NullPointerException("publicationYear must be notnull");
+        if (price < 0) throw new IllegalArgumentException("price must be positive number");
+
+        this.isbnThirteenNo = isbnThirteenNo;
+        this.titleName = titleName;
         this.authorName = authorName;
-        this.publicationYear = Optional.of(publicationYear).get();
+        this.publicationYear = publicationYear;
+        this.price = price;
     }
 
-    public static Book of(String isbnThirteenNo, String titleName, String authorName, int publicationYear) {
+    public static Book of(String isbnThirteenNo, String titleName, String authorName, Integer publicationYear, Integer price) {
         return new Book(
                 isbnThirteenNo,
                 titleName,
                 authorName,
-                publicationYear
+                publicationYear,
+                price
         );
     }
 }
