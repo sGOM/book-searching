@@ -41,102 +41,6 @@ public class DataBaseIndexingApplication {
     System.exit(0);
   }
 
-  // https://discuss.elastic.co/t/api-key-unable-to-find-apikey-with-id/322104
-  // https://www.elastic.co/guide/en/kibana/current/api-keys.html
-  // https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html
-
-  // https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/connecting.html
-  // https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/8.11/_other_authentication_methods.html
-  // https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/_encrypted_communication.html
-
-  // https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/indexing-bulk.html
-
-  public static void indexingDocs() {
-    // URL and API key
-    String host = "change me";
-    int port = 9200;
-    String encodedApiKey = "change me";
-
-    String fingerprint = "change me";
-
-    SSLContext sslContext = TransportUtils.sslContextFromCaFingerprint(fingerprint);
-
-    BasicCredentialsProvider credsProv = new BasicCredentialsProvider();
-    credsProv.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("elastic", "change me"));
-
-    try {
-      int totalSize = bookDocs.size();
-      int batchSize = 10000;
-      AtomicInteger completedDocumentCount = new AtomicInteger(0);
-
-      // Create the low-level client
-      RestClient restClient = RestClient
-              .builder(new HttpHost(host, port, "https"))
-              .setDefaultHeaders(new Header[]{
-                      new BasicHeader("Authorization", "ApiKey " + encodedApiKey)
-              })
-              .setHttpClientConfigCallback(httpAsyncClientBuilder -> httpAsyncClientBuilder
-                      .setSSLContext(sslContext)
-                      .setDefaultCredentialsProvider(credsProv)
-                      .setConnectionTimeToLive((30 * (long) Math.ceil(totalSize / (double) batchSize)), TimeUnit.SECONDS)
-              )
-              .build();
-
-      // Create the transport with a Jackson mapper
-      ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
-
-      // And create the API client
-      ElasticsearchClient esClient = new ElasticsearchClient(transport);
-
-      log.info("Start indexing...");
-      long start = System.currentTimeMillis();
-
-      IntStream.range(0, (totalSize + batchSize - 1) / batchSize)
-              .mapToObj(i -> bookDocs.subList(i * batchSize, Math.min((i + 1) * batchSize, totalSize)))
-              .forEach(subList -> {
-                processBulkRequest(esClient, subList);
-                int cdc = completedDocumentCount.addAndGet(subList.size());
-                log.info(String.format("%.2f%% - %d/%d tasks completed!", 100.0 * cdc / (double)totalSize, cdc, totalSize));
-              });
-
-      long end = System.currentTimeMillis();
-      log.info("수행시간: " + (end - start) + " ms");
-      log.info("Total Generated Documents : {}", bookDocs.size());
-    } catch (Exception e) {
-      log.error("Create or request Elasticsearch request error", e);
-    }
-  }
-
-  public static void processBulkRequest(ElasticsearchClient esClient, List<BookDocument> bookDocs) {
-    BulkRequest.Builder br = new BulkRequest.Builder();
-
-    for (BookDocument bookDoc : bookDocs) {
-      br.operations(op -> op
-              .index(idx -> idx
-                      .index("books")
-                      .id(bookDoc.getIsbn_thirteen_no())
-                      .document(bookDoc))
-      );
-    }
-
-    BulkResponse result;
-    try {
-      result = esClient.bulk(br.build());
-
-      // Log errors, if any
-      if (result.errors()) {
-        log.error("Bulk had errors");
-        for (BulkResponseItem item : result.items()) {
-          if (item.error() != null) {
-            log.error(item.error().reason());
-          }
-        }
-      }
-    } catch (Exception e) {
-      log.error("Elasticsearch java api error [bulk]: ", e);
-    }
-  }
-
   public static void executeBookPipeline() {
     try {
       readBookData();
@@ -194,5 +98,104 @@ public class DataBaseIndexingApplication {
     log.info("수행시간: " + (end - start) + " ms");
 
     log.info("Total Converted Documents : {}", bookDocs.size());
+  }
+  // https://discuss.elastic.co/t/api-key-unable-to-find-apikey-with-id/322104
+  // https://www.elastic.co/guide/en/kibana/current/api-keys.html
+  // https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html
+
+  // https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/connecting.html
+  // https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/8.11/_other_authentication_methods.html
+  // https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/_encrypted_communication.html
+
+  // https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/indexing-bulk.html
+  public static void indexingDocs() {
+
+    int totalSize = bookDocs.size();
+    int batchSize = 10000;
+    AtomicInteger completedDocumentCount = new AtomicInteger(0);
+
+    ElasticsearchClient esClient = createESClient((30 * (long) Math.ceil(totalSize / (double) batchSize)));
+
+    log.info("Start indexing...");
+    long start = System.currentTimeMillis();
+
+    try {
+      IntStream.range(0, (totalSize + batchSize - 1) / batchSize)
+              .mapToObj(i -> bookDocs.subList(i * batchSize, Math.min((i + 1) * batchSize, totalSize)))
+              .forEach(subList -> {
+                processBulkRequest(esClient, subList);
+                int cdc = completedDocumentCount.addAndGet(subList.size());
+                log.info(String.format("%.2f%% - %d/%d tasks completed!", 100.0 * cdc / (double)totalSize, cdc, totalSize));
+              });
+    } catch (Exception e) {
+      log.error("Create or request Elasticsearch request error", e);
+    }
+
+    long end = System.currentTimeMillis();
+    log.info("수행시간: " + (end - start) + " ms");
+    log.info("Total Generated Documents : {}", bookDocs.size());
+  }
+
+  public static ElasticsearchClient createESClient(long connectionTimeToLive) {
+    // URL and API key
+    String host = "localhost";
+    int port = 9200;
+    String encodedApiKey = "change me";
+
+    String fingerprint = "change me";
+
+    SSLContext sslContext = TransportUtils.sslContextFromCaFingerprint(fingerprint);
+
+    BasicCredentialsProvider credsProv = new BasicCredentialsProvider();
+    credsProv.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("elastic", "change me"));
+
+    // Create the low-level client
+    RestClient restClient = RestClient
+            .builder(new HttpHost(host, port, "https"))
+            .setDefaultHeaders(new Header[]{
+                    new BasicHeader("Authorization", "ApiKey " + encodedApiKey)
+            })
+            .setHttpClientConfigCallback(httpAsyncClientBuilder -> httpAsyncClientBuilder
+                    .setSSLContext(sslContext)
+                    .setDefaultCredentialsProvider(credsProv)
+                    .setConnectionTimeToLive(connectionTimeToLive, TimeUnit.SECONDS)
+            )
+            .build();
+
+    // Create the transport with a Jackson mapper
+    ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+
+    // And create the API client
+    return new ElasticsearchClient(transport);
+  }
+
+  public static void processBulkRequest(ElasticsearchClient esClient, List<BookDocument> bookDocs) {
+    BulkRequest.Builder br = new BulkRequest.Builder();
+
+    for (BookDocument bookDoc : bookDocs) {
+      br.operations(op -> op
+              .index(idx -> idx
+                      .index("books")
+                      .id(bookDoc.getIsbn_thirteen_no())
+                      .document(bookDoc))
+      );
+    }
+
+    BulkResponse result;
+    try {
+      result = esClient.bulk(br.build());
+
+      // Log errors, if any
+      if (result.errors()) {
+        log.error("Bulk had errors");
+        for (BulkResponseItem item : result.items()) {
+          if (item.error() != null) {
+            log.error(item.error().reason());
+          }
+        }
+      }
+    } catch (Exception e) {
+      log.error("Elasticsearch java api error [bulk]: ", e);
+    }
   }
 }
