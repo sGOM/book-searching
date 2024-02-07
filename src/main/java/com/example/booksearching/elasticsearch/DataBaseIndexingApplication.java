@@ -1,9 +1,12 @@
 package com.example.booksearching.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.cat.indices.IndicesRecord;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
+import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.TransportUtils;
@@ -12,6 +15,8 @@ import com.example.booksearching.elasticsearch.analysis.HanguelJamoType;
 import com.example.booksearching.elasticsearch.analysis.HangulJamoMorphTokenizer;
 import com.example.booksearching.elasticsearch.model.Book;
 import com.example.booksearching.elasticsearch.model.BookDocument;
+import com.example.booksearching.spring.exception.ElasticsearchCommunicationException;
+import com.example.booksearching.spring.exception.ElasticsearchCommunicationExceptionType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -22,9 +27,12 @@ import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.RestClient;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.StringReader;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -45,6 +53,7 @@ public class DataBaseIndexingApplication {
     try {
       readBookData();
       convertBookToBookDocument();
+      createIndex();
       indexingDocs();
     } catch (Exception e) {
       log.error("Error in executeBookPipeLine: ", e);
@@ -101,6 +110,167 @@ public class DataBaseIndexingApplication {
 
     log.info("Total Converted Documents : {}", bookDocs.size());
   }
+
+  public static void createIndex() throws IOException {
+    final String INDEX_NAME = "books";
+
+    ElasticsearchClient esClient = createESClient(60L);
+    for (IndicesRecord index : esClient.cat().indices().valueBody()) {
+      Optional.ofNullable(index.index()).orElseThrow(() ->
+              new ElasticsearchCommunicationException(ElasticsearchCommunicationExceptionType.ELASTICSEARCH_SEARCH_RESPONSE_EXCEPTION));
+      if (index.index().equals(INDEX_NAME)) {
+        log.info("{} index is already exist!", index.index());
+        DeleteIndexResponse deleteIndexRes = esClient.indices().delete(builder -> builder.index(INDEX_NAME));
+        log.info("{} index is deleted!", index.index());
+        log.info("DeleteIndexResponse: {}", deleteIndexRes);
+      }
+    }
+
+    CreateIndexResponse createIndexRes =
+            esClient.indices().create(builder ->
+                    builder.index(INDEX_NAME)
+                            .withJson(new StringReader(
+                            "{" +
+                              "\"settings\":{" +
+                                "\"index\":{" +
+                                  "\"number_of_shards\":1," +
+                                  "\"number_of_replicas\":0," +
+                                  "\"max_ngram_diff\":30" +
+                                "}," +
+                                "\"analysis\":{" +
+                                  "\"analyzer\":{" +
+                                    "\"ngram-book\":{" +
+                                      "\"type\":\"custom\"," +
+                                      "\"tokenizer\":\"partial\"," +
+                                      "\"filter\":[\"lowercase\"]" +
+                                    "}," +
+                                    "\"edge-book\":{" +
+                                      "\"type\":\"custom\"," +
+                                      "\"tokenizer\":\"edge\"," +
+                                      "\"filter\":[\"lowercase\"]" +
+                                    "}" +
+                                  "}," +
+                                  "\"tokenizer\":{" +
+                                    "\"partial\":{" +
+                                      "\"type\":\"ngram\"," +
+                                      "\"min_gram\":2," +
+                                      "\"max_gram\":30," +
+                                      "\"token_chars\":[\"letter\",\"digit\"]" +
+                                    "}," +
+                                    "\"edge\":{" +
+                                      "\"type\":\"edge_ngram\"," +
+                                      "\"min_gram\":1," +
+                                      "\"max_gram\":30," +
+                                      "\"token_chars\":[\"letter\",\"digit\"]" +
+                                    "}" +
+                                  "}," +
+                                  "\"normalizer\":{" +
+                                    "\"normalizer-book\":{" +
+                                      "\"type\":\"custom\"," +
+                                      "\"filter\":[\"lowercase\"]" +
+                                    "}" +
+                                  "}" +
+                                "}" +
+                              "}," +
+                              "\"mappings\":{" +
+                                "\"_source\":{" +
+                                  "\"excludes\":[\"title_chosung\",\"title_jamo\",\"title_engtokor\"]" +
+                                "}," +
+                                "\"properties\":{" +
+                                  "\"isbn\":{" +
+                                    "\"type\":\"keyword\"" +
+                                  "}," +
+                                  "\"title\":{" +
+                                    "\"type\":\"keyword\"," +
+                                    "\"normalizer\":\"normalizer-book\"," +
+                                    "\"fields\":{" +
+                                      "\"kor\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"nori\"" +
+                                      "}," +
+                                      "\"en\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"standard\"" +
+                                      "}," +
+                                      "\"edge\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"edge-book\"" +
+                                      "}," +
+                                      "\"partial\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"ngram-book\"" +
+                                      "}" +
+                                    "}" +
+                                  "}," +
+                                  "\"title_chosung\":{" +
+                                    "\"type\":\"keyword\"," +
+                                    "\"normalizer\":\"normalizer-book\"," +
+                                    "\"fields\":{" +
+                                      "\"edge\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"edge-book\"" +
+                                      "}," +
+                                      "\"partial\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"ngram-book\"" +
+                                      "}" +
+                                    "}" +
+                                  "}," +
+                                  "\"title_jamo\":{" +
+                                    "\"type\":\"keyword\"," +
+                                    "\"normalizer\":\"normalizer-book\"," +
+                                    "\"fields\":{" +
+                                      "\"edge\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"edge-book\"" +
+                                      "}," +
+                                      "\"partial\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"ngram-book\"" +
+                                      "}" +
+                                    "}" +
+                                  "}," +
+                                  "\"title_engtokor\":{" +
+                                    "\"type\":\"keyword\"," +
+                                    "\"normalizer\":\"normalizer-book\"," +
+                                    "\"fields\":{" +
+                                      "\"edge\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"edge-book\"" +
+                                      "}," +
+                                      "\"partial\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"ngram-book\"" +
+                                      "}" +
+                                    "}" +
+                                  "}," +
+                                  "\"author\":{" +
+                                    "\"type\":\"keyword\"," +
+                                    "\"normalizer\":\"normalizer-book\"," +
+                                    "\"fields\":{" +
+                                      "\"kor\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"nori\"" +
+                                      "}," +
+                                      "\"en\":{" +
+                                        "\"type\":\"text\"," +
+                                        "\"analyzer\":\"standard\"" +
+                                      "}" +
+                                    "}" +
+                                  "}," +
+                                  "\"published_year\":{" +
+                                    "\"type\":\"date\"" +
+                                  "}," +
+                                  "\"price\":{" +
+                                    "\"type\":\"double\"" +
+                                  "}" +
+                                "}" +
+                              "}" +
+                            "}"
+            )));
+    log.info("{} index is created!", createIndexRes.index());
+  }
+
   // https://discuss.elastic.co/t/api-key-unable-to-find-apikey-with-id/322104
   // https://www.elastic.co/guide/en/kibana/current/api-keys.html
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html
