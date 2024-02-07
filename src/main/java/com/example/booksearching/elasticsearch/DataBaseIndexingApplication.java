@@ -67,7 +67,8 @@ public class DataBaseIndexingApplication {
                 resultSet.getString("isbn_thirteen_no"),
                 resultSet.getString("title_nm"),
                 resultSet.getString("authr_nm"),
-                resultSet.getInt("pblicte_year")
+                resultSet.getInt("pblicte_year"),
+                resultSet.getInt("price")
         );
         books.add(book);
       }
@@ -90,7 +91,8 @@ public class DataBaseIndexingApplication {
         morphTokenizer.tokenizer(book.getTitleName(), HanguelJamoType.JAMO),
         morphTokenizer.tokenizer(book.getTitleName(), HanguelJamoType.KORTOENG),
         book.getAuthorName(),
-        book.getPublicationYear()
+        book.getPublicationYear(),
+        book.getPrice()
       );
       bookDocs.add(doc);
     }
