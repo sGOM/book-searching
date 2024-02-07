@@ -1,8 +1,22 @@
-<link rel="stylesheet" href="/css/searchBar.css">
-<div class="icon"></div>
-<div class="input">
-    <input id="inputSearchText" type="text" placeholder="Search" onkeyup="searchBarKeyUpHandler(event)">
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="sGOM">
+    <title>Search Bar</title>
+    <link rel="stylesheet" href="/css/searchBar.css">
+</head>
+<body>
+<div id="searchBarWrap">
+    <div class="icon"></div>
+    <div class="input">
+        <input id="inputSearchText" type="text" placeholder="Search">
+    </div>
+    <span class="clear" id="clearSearchBar"></span>
 </div>
-<span class="clear" id="clearSearchBar" onclick="clearSearchBar()"></span>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/js/searchBar.js"></script>
+<script type="module" src="/js/searchBar.js"></script>
+</body>
+</html>
