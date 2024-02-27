@@ -68,15 +68,15 @@ public class DataBaseIndexingApplication {
     try (Connection connection = DriverManager.getConnection(url, username, password)) {
       log.info("Database Connected!");
       Statement statement = connection.createStatement();
-      ResultSet resultSet = statement.executeQuery("SELECT * FROM books");
+      ResultSet resultSet = statement.executeQuery("SELECT * FROM book");
       books = new ArrayList<>();
 
       while (resultSet.next()) {
         Book book = Book.of(
-                resultSet.getString("isbn_thirteen_no"),
-                resultSet.getString("title_nm"),
-                resultSet.getString("authr_nm"),
-                resultSet.getInt("pblicte_year"),
+                resultSet.getString("isbn"),
+                resultSet.getString("title"),
+                resultSet.getString("author"),
+                resultSet.getInt("publish_year"),
                 resultSet.getInt("price")
         );
         books.add(book);
