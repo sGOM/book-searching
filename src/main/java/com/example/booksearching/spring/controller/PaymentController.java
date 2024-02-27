@@ -23,6 +23,13 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+    @PostMapping(value = "/confirm")
+    public ResponseEntity<PaymentConfirmResponse> confirmPayment(@RequestBody PaymentConfirmRequest paymentConfirmRequest) throws Exception {
+        ResponseEntity<PaymentConfirmResponse> res = paymentService.confirmPayment(paymentConfirmRequest);
+
+        return ResponseEntity.status(res.getStatusCode()).body(res.getBody());
+    }
+
     @GetMapping("/checkout-success")
     public String paymentRequest(PaymentCheckRequest paymentCheckRequest) {
         paymentService.createPaymentInfo(paymentCheckRequest);

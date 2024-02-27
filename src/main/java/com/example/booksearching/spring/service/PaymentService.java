@@ -42,6 +42,10 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
 
+    // @docs https://docs.tosspayments.com/reference/using-api/api-keys
+    @Value("${toss.api-key}")
+    private String apiKey;
+
     public void createPaymentInfo(PaymentCheckRequest paymentCheckRequest) {
         Payment payment = Payment.of(
                 paymentCheckRequest.paymentKey(),
@@ -60,5 +64,65 @@ public class PaymentService {
 
         paymentRepository.save(payment);
         orderRepository.save(order);
+    }
+
+    public ResponseEntity<PaymentConfirmResponse> confirmPayment(PaymentConfirmRequest paymentConfirmRequest) {
+        Payment payment = paymentRepository.findById(paymentConfirmRequest.paymentKey()).orElseThrow();
+        Orders order = orderRepository.findById(paymentConfirmRequest.orderId()).orElseThrow();
+        if (!payment.getAmount().equals(paymentConfirmRequest.amount())) {
+            payment.changeStatus(PaymentStatus.ABORTED);
+            throw new PaymentException(PaymentExceptionType.PAYMENT_MISMATCH_EXCEPTION);
+        }
+
+        PaymentConfirmRequest.Item[] items = paymentConfirmRequest.items();
+        int totalAmount = 0;
+        for (int idx = 0; idx < items.length; idx++) {
+            PaymentConfirmRequest.Item item = items[idx];
+            String orderDetailId = order.getId() + "-" + idx;
+            Book book = bookRepository.findById(item.id()).orElseThrow();
+            int amount = item.quantity() * book.getPrice();
+            totalAmount += amount;
+
+            OrdersDetail ordersDetail = OrdersDetail.of(orderDetailId, item.quantity(), amount, book, order);
+            orderDetailRepository.save(ordersDetail);
+            order.getOrdersDetails().add(ordersDetail);
+        }
+
+        if (order.getTotalAmount() != totalAmount) {
+            payment.changeStatus(PaymentStatus.ABORTED);
+            throw new PaymentException(PaymentExceptionType.PAYMENT_MISMATCH_EXCEPTION);
+        }
+
+        ResponseEntity<PaymentConfirmResponse> res = performTossConfirmation(paymentConfirmRequest);
+
+        PaymentConfirmResponse paymentConfirmResponse = res.getBody();
+        payment.changeStatus(paymentConfirmResponse.status());
+        if (payment.getStatus() != PaymentStatus.DONE) {
+            throw new PaymentException(PaymentExceptionType.PAYMENT_CONFIRM_FAIL);
+        }
+        order.changeStatus(OrderStatus.ORDER_RECEIVED);
+
+        return res;
+    }
+
+    private ResponseEntity<PaymentConfirmResponse> performTossConfirmation(PaymentConfirmRequest paymentConfirmRequest) {
+        // @docs https://docs.tosspayments.com/reference/using-api/authorization#%EC%9D%B8%EC%A6%9D
+        WebClient webClient = WebClient.create();
+        String url = "https://api.tosspayments.com/v1/payments/confirm";
+        String encodedApiKey = Base64.getEncoder().encodeToString((apiKey + ":").getBytes(StandardCharsets.UTF_8));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Basic " + encodedApiKey);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        try {
+            return webClient.post().uri(url)
+                    .headers(httpHeaders -> httpHeaders.addAll(headers))
+                    .bodyValue(paymentConfirmRequest)
+                    .retrieve()
+                    .toEntity(PaymentConfirmResponse.class)
+                    .block();
+        } catch (Exception e) {
+            throw new TossException(TossExceptionType.TOSS_CONFIRM_FAIL);
+        }
     }
 }
