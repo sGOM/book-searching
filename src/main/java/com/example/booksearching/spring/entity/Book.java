@@ -6,6 +6,7 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,8 +30,8 @@ public class Book {
     @Column(length = 200)
     private String author;
 
+    @PositiveOrZero
     @Column(nullable = false)
-    @Min(value = 0, message = "가격은 0 이상이어야 합니다")
     private Integer price;
 
     private Year publishYear;
