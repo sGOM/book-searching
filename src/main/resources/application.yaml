@@ -26,3 +26,6 @@ elasticsearch:
   password: change me
   encodedApiKey: change me
   fingerprint: change me
+
+toss:
+  api-key: change me
