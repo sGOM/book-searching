@@ -29,4 +29,13 @@ public class PaymentController {
 
         return "/checkout-success";
     }
+
+
+    @GetMapping("/checkout-fail")
+    public String failPayment(PaymentFailRequest paymentFailRequest, Model model) {
+        model.addAttribute("code", paymentFailRequest.code());
+        model.addAttribute("message", paymentFailRequest.message());
+
+        return "/checkout-fail";
+    }
 }
