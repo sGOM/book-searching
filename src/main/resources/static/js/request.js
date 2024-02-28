@@ -1,4 +1,4 @@
-export async function requestAutocompleteSuggestions(keyword) {
+async function requestAutocompleteSuggestions(keyword) {
     try {
         const res = await $.ajax({
             url: 'http://localhost:8080/search/auto-complete',
@@ -13,7 +13,7 @@ export async function requestAutocompleteSuggestions(keyword) {
     }
 }
 
-export async function requestBookSearch(paramsObject) {
+async function requestBookSearch(paramsObject) {
     let params = createQueryString(paramsObject);
 
     window.history.replaceState({ params: params }, '', '/search?' + params);

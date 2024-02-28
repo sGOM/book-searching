@@ -1,6 +1,3 @@
-import { requestAutocompleteSuggestions, requestBookSearch } from './request.js';
-import { createElement } from './utils.js';
-
 let suggestions = [];
 let currentFocus = -1;
 const tempListSearchSize = 24;
