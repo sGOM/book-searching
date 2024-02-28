@@ -23,10 +23,11 @@ async function requestBookSearch(paramsObject) {
             url: 'http://localhost:8080/search?' + params,
             type: 'GET',
             success: function(res) {
-                    document.open();
-                    document.write(res);
-                    document.close();
-                }
+                const resElement = new DOMParser().parseFromString(res, 'text/html');
+                const booksSecWrapFromRes = resElement.getElementById('booksSecWrap');
+                const booksSecWrapDiv = document.getElementById('booksSecWrap');
+                booksSecWrapDiv.replaceWith(booksSecWrapFromRes);
+            }
         });
     } catch (err) {
         console.log('Error:', err);
