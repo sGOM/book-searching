@@ -19,12 +19,15 @@
                                 </div>
                                 <div class="info-row info-price">
                                     <strong class="txt-num">
-                                        <em class="book-price"></em>
+                                        <em class="book-price" th:text="${bookInfo.price}"></em>
+                                        원
                                     </strong>
                                 </div>
                             </div>
                             <div class="item-btn-col">
-                                <a class="btn-c btn-sBlue">
+                                <a class="btn-c btn-sBlue" href="#"
+                                   th:attr="data-book=${bookInfo}"
+                                   th:onclick="openModal(this.getAttribute('data-book'))">
                                     <span class="btn-wrap">
                                         <em class="txt">바로구매</em>
                                     </span>
@@ -52,3 +55,4 @@
     </section>
 </div>
 <div id="checkout-modal-wrapper" class="modal" th:insert="~{fragments/checkout}"></div>
+<script type="text/javascript" src="/js/checkout.js"></script>
