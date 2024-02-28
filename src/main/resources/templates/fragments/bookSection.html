@@ -1,9 +1,10 @@
-                <div class="booksSecTit" th:text="'검색 결과: ' + ${data.pageInfo != null ? data.pageInfo.totalElements : 'N/A'}"></div>
 <link rel="stylesheet" href="/css/bookSection.css">
 <div class="booksSec">
     <section id="booksListWrap">
         <div class="booksSecTop">
+            <div class="booksSecTit" th:text="'검색 결과: ' + ${data != null ? data.pageInfo.totalElements : '0'}"></div>
         </div>
+        <th:block th:if="${data != null}">
             <div class="booksSecArea">
                 <ul id="booksList" class="bLi">
                     <li th:each="bookInfo : ${data.booksInfo}">
@@ -47,5 +48,7 @@
                     </th:block>
                 </div>
             </div>
+        </th:block>
+    </section>
 </div>
 <div id="checkout-modal-wrapper" class="modal" th:insert="~{fragments/checkout}"></div>
