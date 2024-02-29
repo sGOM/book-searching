@@ -1,11 +1,8 @@
 package com.example.booksearching.spring.entity;
 
-import com.example.booksearching.spring.entity.converter.YearToIntConverter;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.Getter;

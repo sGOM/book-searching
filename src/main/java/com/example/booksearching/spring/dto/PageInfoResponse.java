@@ -1,13 +1,26 @@
 package com.example.booksearching.spring.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+
 import java.util.List;
 
 public record PageInfoResponse (
+    @NotNull
+    @PositiveOrZero
     int page,
+    @NotNull
+    @PositiveOrZero
     int size,
+    @NotNull
+    @PositiveOrZero
     int totalPages,
+    @NotNull
+    @PositiveOrZero
     long totalElements,
+    @NotNull
     boolean totalHitsRelationIsEq,
+    @NotNull
     List<Integer> barNumberList
 ) {
 
