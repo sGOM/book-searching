@@ -18,9 +18,9 @@ public record PaymentConfirmRequest(
         Item[] items
 ) {
     public record Item(
-            String id,
             @NotNull
             @Size(min = 13, max = 13)
+            String isbn,
             @NotNull
             @PositiveOrZero
             Integer quantity

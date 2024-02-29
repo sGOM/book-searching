@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
 
 @Slf4j
@@ -79,7 +78,7 @@ public class PaymentService {
         for (int idx = 0; idx < items.length; idx++) {
             PaymentConfirmRequest.Item item = items[idx];
             String orderDetailId = order.getId() + "-" + idx;
-            Book book = bookRepository.findById(item.id()).orElseThrow();
+            Book book = bookRepository.findById(item.isbn()).orElseThrow();
             int amount = item.quantity() * book.getPrice();
             totalAmount += amount;
 
