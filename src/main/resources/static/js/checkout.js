@@ -43,7 +43,6 @@ function generateOrderID() {
 
 function setPaymentWidget(bookInfo) {
     const button = removeAllEventListeners(document.getElementById("payment-button"));
-    const coupon = removeAllEventListeners(document.getElementById("coupon-box"));
 
     let amount = Math.floor(bookInfo.price);
     const items = [];
@@ -71,16 +70,6 @@ function setPaymentWidget(bookInfo) {
     // ------  이용약관 UI 렌더링 ------
     // @docs https://docs.tosspayments.com/reference/widget-sdk#renderagreement선택자-옵션
     paymentWidget.renderAgreement("#agreement", { variantKey: "AGREEMENT" });
-
-    // ------  결제 금액 업데이트 ------
-    // @docs https://docs.tosspayments.com/reference/widget-sdk#updateamount결제-금액
-    coupon.addEventListener("change", function () {
-        if (coupon.checked) {
-            paymentMethodWidget.updateAmount(amount - 5000);
-        } else {
-            paymentMethodWidget.updateAmount(amount);
-        }
-    });
 
     // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------
     // @docs https://docs.tosspayments.com/reference/widget-sdk#requestpayment결제-정보
