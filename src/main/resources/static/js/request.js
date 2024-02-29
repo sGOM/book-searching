@@ -34,6 +34,25 @@ async function requestBookSearch(paramsObject) {
     }
 }
 
+async function requestPaymentConfirm(req) {
+    const res = await $.ajax({
+        url: "/payment/confirm",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(req),
+        complete: function(xhr) {
+            if (xhr.status !== 200) {
+                const failure = res.failure;
+                window.location.href = `/checkout-fail?message=${failure.message}&code=${failure.code}`;
+            }
+            alert('결제 성공!');
+            history.go(-2);
+        }
+    });
+
+    return res;
+}
+
 function createQueryString(paramsObject) {
     const queryParams = Object.keys(paramsObject).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(paramsObject[key])}`);
     return queryParams.join('&');
