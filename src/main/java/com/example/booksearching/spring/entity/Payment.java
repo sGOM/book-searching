@@ -4,6 +4,7 @@ import com.example.booksearching.spring.entity.constant.PaymentStatus;
 import com.example.booksearching.spring.entity.constant.PaymentType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Payment {
     @Id
+    @Size(max = 200)
     private String paymentKey;
 
     @PositiveOrZero
