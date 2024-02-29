@@ -4,16 +4,26 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.example.booksearching.elasticsearch.model.BookDocument;
 import com.example.booksearching.spring.exception.ElasticsearchCommunicationException;
 import com.example.booksearching.spring.exception.ElasticsearchCommunicationExceptionType;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 import java.time.Year;
 import java.util.Optional;
 
 public record BookInfoResponse(
+        @NotNull
+        @Size(min = 13, max = 13)
         String isbn,
+        @NotNull
+        @Size(max = 250)
         String title,
         String highlightTitle,
+        @Size(max = 200)
         String author,
         Year publishedYear,
+        @NotNull
+        @PositiveOrZero
         Integer price
 ) {
 
