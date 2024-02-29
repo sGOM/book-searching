@@ -1,19 +1,10 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="sGOM">
-    <title>book Section</title>
-    <link rel="stylesheet" href="/css/bookSection.css">
-</head>
-<body>
-    <div class="booksSec">
-        <section id="booksListWrap">
-            <div class="booksSecTop">
-                <div class="booksSecTit" th:text="'검색 결과: ' + ${data.pageInfo != null ? data.pageInfo.totalElements : 'N/A'}"></div>
-            </div>
+<link rel="stylesheet" href="/css/bookSection.css">
+<div class="booksSec">
+    <section id="booksListWrap">
+        <div class="booksSecTop">
+            <div class="booksSecTit" th:text="'검색 결과: ' + ${data != null ? data.pageInfo.totalElements : '0'}"></div>
+        </div>
+        <th:block th:if="${data != null}">
             <div class="booksSecArea">
                 <ul id="booksList" class="bLi">
                     <li th:each="bookInfo : ${data.booksInfo}">
@@ -28,12 +19,15 @@
                                 </div>
                                 <div class="info-row info-price">
                                     <strong class="txt-num">
-                                        <em class="book-price"></em>
+                                        <em class="book-price" th:text="${bookInfo.price}"></em>
+                                        원
                                     </strong>
                                 </div>
                             </div>
                             <div class="item-btn-col">
-                                <a class="btn-c btn-sBlue">
+                                <a class="btn-c btn-sBlue" href="#"
+                                   th:attr="data-book=${bookInfo}"
+                                   th:onclick="openModal(this.getAttribute('data-book'))">
                                     <span class="btn-wrap">
                                         <em class="txt">바로구매</em>
                                     </span>
@@ -57,7 +51,8 @@
                     </th:block>
                 </div>
             </div>
-        </section>
-    </div>
-</body>
-</html>
+        </th:block>
+    </section>
+</div>
+<div id="checkout-modal-wrapper" class="modal" th:insert="~{fragments/checkout}"></div>
+<script type="text/javascript" src="/js/checkout.js"></script>

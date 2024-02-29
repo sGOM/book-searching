@@ -15,5 +15,3 @@ function createElement(elementTag, classNameList, id, type) {
 
     return el;
 }
-
-export { createElement };

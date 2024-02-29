@@ -8,8 +8,12 @@
   <title>Home Page</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/ui.css">
+  <script src="/js/utils.js"></script>
+  <script src="/js/request.js"></script>
+  <script src="/js/storageManager.js"></script>
 </head>
 <body>
-  <div th:replace="fragments/searchBar"></div>
+  <div id="searchBarWrap" th:insert="~{fragments/searchBar}"></div>
+  <div id="booksSecWrap" th:insert="~{fragments/bookSection}"></div>
 </body>
 </html>

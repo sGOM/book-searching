@@ -29,7 +29,7 @@ public class SearchController {
     ) {
         map.addAttribute("data", searchService.searchBooks(keyword, page, size));
 
-        return "search";
+        return "index";
     }
 
     @GetMapping("/auto-complete")
