@@ -1,6 +1,9 @@
 package com.example.booksearching.spring.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
@@ -24,7 +27,7 @@ public class OrdersDetail {
     @Column(nullable = false)
     private Integer amount;
 
-    @OneToOne
+    @ManyToOne
     private Book book;
 
     @ManyToOne
