@@ -1,7 +1,7 @@
 async function requestAutocompleteSuggestions(keyword) {
     try {
         const res = await $.ajax({
-            url: 'http://localhost:8080/search/auto-complete',
+            url: '/search/auto-complete',
             type: 'GET',
             data: {
                 keyword: keyword
@@ -20,7 +20,7 @@ async function requestBookSearch(paramsObject) {
 
     try {
         const res = await $.ajax({
-            url: 'http://localhost:8080/search?' + params,
+            url: '/search?' + params,
             type: 'GET',
             success: function(res) {
                 const resElement = new DOMParser().parseFromString(res, 'text/html');
