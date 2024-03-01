@@ -1,0 +1,58 @@
+<link rel="stylesheet" href="/css/bookSection.css">
+<div class="booksSec">
+    <section id="booksListWrap">
+        <div class="booksSecTop">
+            <div class="booksSecTit" th:text="'검색 결과: ' + ${data != null ? data.pageInfo.totalElements : '0'}"></div>
+        </div>
+        <th:block th:if="${data != null}">
+            <div class="booksSecArea">
+                <ul id="booksList" class="bLi">
+                    <li th:each="bookInfo : ${data.booksInfo}">
+                        <div class="item-unit">
+                            <div class="item-img"></div>
+                            <div class="item-info">
+                                <div class="info-row info-title">
+                                    <a class="book-title" th:text="${bookInfo.title}"></a>
+                                </div>
+                                <div class="info-row info-pub-grp">
+                                    <span class="auth-pub info-auth" th:text="${bookInfo.author}"></span>
+                                </div>
+                                <div class="info-row info-price">
+                                    <strong class="txt-num">
+                                        <em class="book-price" th:text="${bookInfo.price}"></em>
+                                        원
+                                    </strong>
+                                </div>
+                            </div>
+                            <div class="item-btn-col">
+                                <a class="btn-c btn-sBlue" href="#"
+                                   th:attr="data-book=${bookInfo}"
+                                   th:onclick="openModal(this.getAttribute('data-book'))">
+                                    <span class="btn-wrap">
+                                        <em class="txt">바로구매</em>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="booksPagination">
+                <div class="ui-pagination">
+                    <th:block th:each="barNum : ${data.pageInfo.barNumberList}">
+                        <th:block th:if="${barNum == data.pageInfo.page}">
+                            <strong class="num" th:text="${barNum}"></strong>
+                        </th:block>
+                        <th:block th:unless="${barNum == data.pageInfo.page}">
+                            <a class="num" th:title="${barNum}" th:text="${barNum}" th:href="@{/search(
+                            keyword=${data.keyword},
+                            page=${barNum})}"></a>
+                        </th:block>
+                    </th:block>
+                </div>
+            </div>
+        </th:block>
+    </section>
+</div>
+<div id="checkout-modal-wrapper" class="modal" th:insert="~{fragments/checkout}"></div>
+<script type="text/javascript" src="/js/checkout.js"></script>

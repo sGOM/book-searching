@@ -8,13 +8,16 @@ import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.core.search.*;
+import co.elastic.clients.elasticsearch.core.search.Highlight;
+import co.elastic.clients.elasticsearch.core.search.HighlightField;
+import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
+import co.elastic.clients.elasticsearch.core.search.TotalHitsRelation;
 import com.example.booksearching.elasticsearch.model.BookDocument;
+import com.example.booksearching.spring.dto.BookInfoResponse;
 import com.example.booksearching.spring.dto.BookSearchResponse;
-import com.example.booksearching.spring.entity.Book;
+import com.example.booksearching.spring.dto.PageInfoResponse;
 import com.example.booksearching.spring.exception.ElasticsearchCommunicationException;
 import com.example.booksearching.spring.exception.ElasticsearchCommunicationExceptionType;
-import com.example.booksearching.spring.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,16 +31,27 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 @Service
-public class BookService {
+public class SearchService {
 
-    private final BookRepository bookRepository;
+    private final PaginationService paginationService;
     private final ElasticsearchClient esClient;
 
-    public Book saveDocInfo(Book book) {
-        return bookRepository.save(book);
+    public BookSearchResponse searchBooks(String keyword, Integer page, Integer size) {
+        HitsMetadata<BookDocument> hitsMetadata = searchBooksByKeyword(keyword, page, size);
+        List<BookInfoResponse> booksInfo = hitsMetadata.hits().stream().map(BookInfoResponse::from).toList();
+        PageInfoResponse pagInfo = paginationService.getPageInfo(hitsMetadata, page, size);
+
+        return BookSearchResponse.of(keyword, booksInfo, pagInfo);
     }
 
-    public List<BookSearchResponse> searchBookTitles(String keyword, Integer size) {
+    public List<BookInfoResponse> searchAutocompleteSuggestions(String keyword) {
+        HitsMetadata<BookDocument> hitsMetadata = searchBooksByKeyword(keyword, 1, 10); // TODO: Validation 또 해야 할지 고민
+        List<BookInfoResponse> booksInfo = hitsMetadata.hits().stream().map(BookInfoResponse::from).toList();
+
+        return booksInfo;
+    }
+
+    public HitsMetadata<BookDocument> searchBooksByKeyword(String keyword, Integer page, Integer size) {
         final String BOOK_INDEX = "books";
         final String FIELD_NAME = "title";
         final Float KEYWORD_BOOST_VALUE = 2f;
@@ -68,6 +82,7 @@ public class BookService {
         SearchRequest searchRequest = new SearchRequest.Builder()
                 .index(BOOK_INDEX)
                 .size(size)
+                .from(size * (page - 1))        // TODO: 높은 수가 들어 가면 어떻게 되는지 테스트
                 .query(queryBuilder -> queryBuilder.disMax(disMaxQuery))
                 .highlight(highlight)
                 .build();
@@ -81,17 +96,14 @@ public class BookService {
             throw new ElasticsearchCommunicationException(ElasticsearchCommunicationExceptionType.ELASTICSEARCH_IO_FAIL);
         }
 
-        TotalHits total = response.hits().total();
-        assert total != null;
-        boolean isExactResult = total.relation() == TotalHitsRelation.Eq;
-        log.info("There are " + (isExactResult ? "" : "more than ") + total.value() + " results");
+        HitsMetadata<BookDocument> hitsMetadata = response.hits();
+        List<BookInfoResponse> booksInfo = hitsMetadata.hits().stream().map(BookInfoResponse::from).toList();
 
-        List<Hit<BookDocument>> hits = response.hits().hits();
-        List<BookSearchResponse> res = hits.stream().map(BookSearchResponse::from).toList();
+        Optional.ofNullable(hitsMetadata.total()).orElseThrow(()-> new ElasticsearchCommunicationException(ElasticsearchCommunicationExceptionType.ELASTICSEARCH_SEARCH_FAIL));
+        log.info("There are " + (hitsMetadata.total().relation() == TotalHitsRelation.Eq ? "" : "more than ") + hitsMetadata.total().value() + " results");
+        log.info("Search result: {{}}", booksInfo.stream().map(BookInfoResponse::toString).collect(Collectors.joining(",\n")));
 
-        log.info("Search result: {{}}", res.stream().map(BookSearchResponse::toString).collect(Collectors.joining(",\n")));
-
-        return res;
+        return hitsMetadata;
     }
 
     private boolean containsKorean(String text) {

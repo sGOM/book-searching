@@ -1,4 +1,4 @@
-export function createElement(elementTag, classNameList, id, type) {
+function createElement(elementTag, classNameList, id, type) {
     const el = document.createElement(elementTag);
 
     if (Array.isArray(classNameList) && classNameList.length > 0) {

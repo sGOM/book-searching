@@ -1,10 +1,9 @@
 package com.example.booksearching.spring.entity;
 
-import com.example.booksearching.spring.entity.converter.YearToIntConverter;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,40 +18,36 @@ import java.util.Optional;
 public class Book {
 
     @Id
-    @Column(length = 100)
-    private String id;
+    @Column(length = 13)
+    private String isbn;
+
     @Column(nullable = false, length = 250)
-    private String name;
-    @Column(nullable = false, length = 200)
-    private String kdcLabel;
-    @Column(nullable = false, length = 3)
-    private String kdcCode;
-//    @Column(nullable = false, length = 600)
-//    private String summary;
+    private String title;
+
     @Column(length = 200)
     private String author;
-//    @Column(length = 200)
-//    private String publisher;
-    @Convert(converter = YearToIntConverter.class)
-    private Year publishedYear;
 
-    private Book(String id, String name, String kdcLabel, String kdcCode, String author, Year publishedYear) {
-        this.id = id;
-        this.name = name;
-        this.kdcLabel = kdcLabel;
-        this.kdcCode = kdcCode;
+    @PositiveOrZero
+    @Column(nullable = false)
+    private Integer price;
+
+    private Year publishYear;
+
+    private Book(String isbn, String title, String author, Integer price, Year publishYear) {
+        this.isbn = isbn;
+        this.title = title;
         this.author = author;
-        this.publishedYear = publishedYear;
+        this.price = price;
+        this.publishYear = publishYear;
     }
 
-    public static Book of(String id, String name, String kdcLabel, String kdcCode, String author, Year publishedYear) {
+    public static Book of(String isbn, String title, String author, Integer price, Year publishYear) {
         return new Book(
-                Optional.of(id).get(),
-                Optional.of(name).get(),
-                Optional.of(kdcLabel).get(),
-                Optional.of(kdcCode).get(),
+                Optional.of(isbn).get(),
+                Optional.of(title).get(),
                 author,
-                publishedYear
+                price,
+                publishYear
         );
     }
 
@@ -60,12 +55,12 @@ public class Book {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Book that)) return false;
-        return this.getId() != null && this.getId().equals(that.getId());
+        return this.getIsbn() != null && this.getIsbn().equals(that.getIsbn());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getId());
+        return Objects.hash(this.getIsbn());
     }
 
 }

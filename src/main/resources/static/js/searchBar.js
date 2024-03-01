@@ -1,46 +1,49 @@
-import { searchBooksRequest } from './request.js';
-import { createElement } from './createElement.js';
-
 let suggestions = [];
 let currentFocus = -1;
-const autocompleteSearchSize = 10;
 const tempListSearchSize = 24;
 
-document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('clearSearchBar').onclick = function() { document.getElementById('inputSearchText').value = ''; };
+async function searchBarKeyUpHandler(e) {
+    const inputSearchText = document.getElementById('inputSearchText');
+    const keyword = inputSearchText.value;
 
-    document.getElementById('inputSearchText').addEventListener('keyup', async function (e) {
-        const keyword = document.getElementById('inputSearchText').value;
+    if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) {
 
-        if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) {
+        const data = await requestAutocompleteSuggestions(keyword);
+        suggestions = data;
 
-            suggestions = await searchBooksRequest(keyword, autocompleteSearchSize);
-            currentFocus = -1;
+        currentFocus = -1;
 
-            closeAllLists();
+        closeAllLists();
 
-            if (!keyword) return false;
+        if (!keyword) return false;
 
-            const autoCompleteList = createElement("ul", ["autocomplete-items"], "autocomplete-list");
+        const autoCompleteList = createElement("ul", ["autocomplete-items"], "autocomplete-list");
 
-            this.parentNode.appendChild(autoCompleteList);
-            addAutoCompleteElements(autoCompleteList, this);
-        } else if (["Enter"].includes(e.key)) {
-            closeAllLists();
-            window.searchResult = await searchBooksRequest(keyword, tempListSearchSize);
-        } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
-            updateFocus(e);
-            const focusedItem = document.getElementsByClassName('autocomplete-item-active')[0];
-            if (focusedItem) {
-                const focusedItemTitleElement = focusedItem.querySelector("div.title");
+        inputSearchText.parentNode.appendChild(autoCompleteList);
+        addAutoCompleteElements(autoCompleteList, this);
+    } else if (["Enter"].includes(e.key)) {
+        closeAllLists();
+        requestBookSearch({
+            keyword: keyword,
+            page: 1,
+            size: tempListSearchSize
+        });
+    } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
+        updateFocus(e);
+        const focusedItem = document.getElementsByClassName('autocomplete-item-active')[0];
+        if (focusedItem) {
+            const focusedItemTitleElement = focusedItem.querySelector("div.title");
 
-                if (focusedItemTitleElement) {
-                    $(this).val(focusedItemTitleElement.textContent);
-                }
+            if (focusedItemTitleElement) {
+                inputSearchText.value = focusedItemTitleElement.textContent;
             }
         }
-    });
-});
+    }
+}
+
+function clearSearchBar() {
+    document.getElementById('inputSearchText').value = '';
+}
 
 function updateFocus(e) {
     const autoCompleteList = document.getElementById("autocomplete-list");
@@ -81,7 +84,11 @@ function addAutoCompleteElements(autoCompleteList, input) {
         item.addEventListener("click", async function () {
             const searchKeyword = this.querySelector("input").value;
             input.value = searchKeyword;
-            window.searchResult = await searchBooksRequest(searchKeyword, tempListSearchSize);
+            requestBookSearch({
+                keyword: searchKeyword,
+                page: 1,
+                size: tempListSearchSize
+            });
             closeAllLists();
         });
 
@@ -102,17 +109,21 @@ function removeFocus(items) {
     Array.from(items).forEach(item => item.classList.remove("autocomplete-item-active"));
 }
 
-function closeAllLists(el) {
+function closeAllLists() {
     const input = document.getElementById("inputSearchText");
     const autoCompleteLists = document.getElementsByClassName("autocomplete-items");
 
-    Array.from(autoCompleteLists).forEach(list => {
-        if (el !== list && el !== input) {
-            list.parentNode.removeChild(list);
+    const listsArray = Array.from(autoCompleteLists);
+
+    listsArray.forEach(list => {
+        while (list.firstChild) {
+            list.removeChild(list.firstChild);
         }
+
+        list.parentNode.removeChild(list);
     });
 }
 
-document.addEventListener("click", function (e) {
-    closeAllLists(e.target);
+document.addEventListener("click", function () {
+    closeAllLists();
 });

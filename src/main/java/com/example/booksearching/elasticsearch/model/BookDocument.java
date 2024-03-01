@@ -17,8 +17,9 @@ public class BookDocument {
     private String title_engtokor;
     private String author;
     private int published_year;
+    private int price;
 
-    private BookDocument(String isbnThirteenNo, String title, String titleChosung, String titleJamo, String titleEngToKor, String author, int publishedYear) {
+    private BookDocument(String isbnThirteenNo, String title, String titleChosung, String titleJamo, String titleEngToKor, String author, int publishedYear, int price) {
         this.isbn_thirteen_no = isbnThirteenNo;
         this.title = title;
         this.title_chosung = titleChosung;
@@ -26,9 +27,10 @@ public class BookDocument {
         this.title_engtokor = titleEngToKor;
         this.author = author;
         this.published_year = publishedYear;
+        this.price = price;
     }
 
-    public static BookDocument of(String isbnThirteenNo, String title, String titleChosung, String titleJamo, String titleEngToKor, String author, int publishedYear) {
+    public static BookDocument of(String isbnThirteenNo, String title, String titleChosung, String titleJamo, String titleEngToKor, String author, int publishedYear, int price) {
         return new BookDocument(
                 isbnThirteenNo,
                 title,
@@ -36,7 +38,8 @@ public class BookDocument {
                 titleJamo,
                 titleEngToKor,
                 author,
-                publishedYear
+                publishedYear,
+                price
         );
     }
 }
