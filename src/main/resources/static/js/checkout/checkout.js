@@ -46,7 +46,7 @@ function setPaymentWidget(bookInfo) {
 
     let amount = Math.floor(bookInfo.price);
     const items = [];
-    items.push({id: bookInfo.isbn, quantity: 1});
+    items.push({isbn: bookInfo.isbn, quantity: 1});
     StorageManager.setLocalStorage('amount', amount);
     StorageManager.setLocalStorage('items', items);
 
