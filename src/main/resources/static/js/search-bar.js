@@ -7,7 +7,6 @@ async function searchBarKeyUpHandler(e) {
     const keyword = inputSearchText.value;
 
     if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) {
-
         const data = await requestAutocompleteSuggestions(keyword);
         suggestions = data;
 
@@ -23,11 +22,12 @@ async function searchBarKeyUpHandler(e) {
         addAutoCompleteElements(autoCompleteList, this);
     } else if (["Enter"].includes(e.key)) {
         closeAllLists();
-        requestBookSearch({
+        let params = {
             keyword: keyword,
             page: 1,
             size: tempListSearchSize
-        });
+        }
+        window.location.href = generateUrl('/search', params);
     } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
         updateFocus(e);
         const focusedItem = document.getElementsByClassName('autocomplete-item-active')[0];
@@ -84,11 +84,12 @@ function addAutoCompleteElements(autoCompleteList, input) {
         item.addEventListener("click", async function () {
             const searchKeyword = this.querySelector("input").value;
             input.value = searchKeyword;
-            requestBookSearch({
-                keyword: searchKeyword,
+            let params = {
+                keyword: suggestion.title,
                 page: 1,
                 size: tempListSearchSize
-            });
+            }
+            window.location.href = generateUrl('/search', params);
             closeAllLists();
         });
 

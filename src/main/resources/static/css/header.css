@@ -1,0 +1,27 @@
+#headerWrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sign-in-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    float: right;
+}
+
+.header-nickname {
+    color: #ffffff; /* 텍스트 색상을 흰색으로 설정 */
+    font-size: 16px; /* 글꼴 크기를 16px로 설정 */
+    margin-right: 10px; /* 오른쪽 마진을 10px로 설정 */
+}
