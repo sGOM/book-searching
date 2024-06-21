@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/ui.css">
+    <link rel="stylesheet" href="/css/sign.css">
+    <script src="/js/utils/request.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/utils/storage-manager.js"></script>
+    <script src="/js/sign.js"></script>
+</head>
+<body>
+<form action="javascript:void(0);" id="sign-up-form">
+    <table>
+        <tr>
+            <td><h2>회원가입</h2></td>
+        </tr>
+        <tr>
+            <td>아이디</td>
+        </tr>
+        <tr>
+            <td><input type="text" name="username" placeholder="알파벳 또는 숫자 6~12자"></td>
+        </tr>
+        <tr>
+            <td>비밀번호</td>
+        </tr>
+        <tr>
+            <td><input type="password" name="password" placeholder="알파벳, 숫자, 특수문자 모두 포함 8~16자"></td>
+        </tr>
+        <tr>
+            <td>이름</td>
+        </tr>
+        <tr>
+            <td><input type="text" name="nickname" placeholder="3~20자 이하"></td>
+        </tr>
+        <tr><td><input type="submit" value="가입하기" class="btn"></td></tr>
+    </table>
+</form>
+</body>
+</html>

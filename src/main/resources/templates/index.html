@@ -8,12 +8,13 @@
   <title>Home Page</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/ui.css">
-  <script src="/js/utils.js"></script>
-  <script src="/js/request.js"></script>
-  <script src="/js/storageManager.js"></script>
+  <script src="/js/utils/request.js"></script>
+  <script src="/js/utils/storage-manager.js"></script>
+  <script src="/js/utils/utils.js"></script>
 </head>
 <body>
-  <div id="searchBarWrap" th:insert="~{fragments/searchBar}"></div>
-  <div id="booksSecWrap" th:insert="~{fragments/bookSection}"></div>
+  <div id="headerWrap" th:insert="~{fragments/header}"></div>
+  <div id="searchBarWrap" th:insert="~{fragments/search-bar}"></div>
+  <div id="booksSecWrap" th:insert="~{fragments/book-section}"></div>
 </body>
 </html>
