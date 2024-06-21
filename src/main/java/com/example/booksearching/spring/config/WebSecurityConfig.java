@@ -1,5 +1,6 @@
 package com.example.booksearching.spring.config;
 
+import com.example.booksearching.spring.security.authentication.dao.CustomDaoAuthenticationConfigurer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -39,9 +40,17 @@ public class WebSecurityConfig {
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(getAuthorityNotRequiredUrl()).permitAll()
                         .anyRequest().authenticated()
+                )
+                .with(
+                        customDaoAuthenticationConfig(),
+                        Customizer.withDefaults()
                 );
 
         return http.build();
+    }
+
+    private CustomDaoAuthenticationConfigurer customDaoAuthenticationConfig() {
+        return new CustomDaoAuthenticationConfigurer();
     }
 
     private RequestMatcher getAuthorityNotRequiredUrl() {
