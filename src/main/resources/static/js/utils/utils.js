@@ -15,3 +15,10 @@ function createElement(elementTag, classNameList, id, type) {
 
     return el;
 }
+
+function generateUrl(baseUrl, params) {
+    let url = baseUrl;
+    let queries = Object.keys(params).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`);
+
+    return url + '?' + queries.join('&');
+}

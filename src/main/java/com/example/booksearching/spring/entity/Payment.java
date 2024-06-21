@@ -22,11 +22,11 @@ public class Payment {
     private Integer amount;
 
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
     private PaymentType type;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
     private PaymentStatus status;
 
     private Payment(String paymentKey, Integer amount, PaymentType type, PaymentStatus status) {
