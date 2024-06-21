@@ -1,32 +1,22 @@
-package com.example.booksearching.spring.controller;
+package com.example.booksearching.spring.controller.web;
 
 import com.example.booksearching.spring.dto.PaymentCheckRequest;
-import com.example.booksearching.spring.dto.PaymentConfirmRequest;
-import com.example.booksearching.spring.dto.PaymentConfirmResponse;
 import com.example.booksearching.spring.dto.PaymentFailRequest;
 import com.example.booksearching.spring.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/payment")
 @Controller
-public class PaymentController {
+public class PaymentPageController {
 
     private final PaymentService paymentService;
-
-    @PostMapping("/confirm")
-    public ResponseEntity<PaymentConfirmResponse> confirmPayment(@RequestBody PaymentConfirmRequest paymentConfirmRequest) {
-        return paymentService.confirmPayment(paymentConfirmRequest);
-    }
 
     @GetMapping("/checkout-success")
     public String paymentRequest(PaymentCheckRequest paymentCheckRequest) {

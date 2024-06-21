@@ -1,10 +1,10 @@
-package com.example.booksearching.spring.controller;
+package com.example.booksearching.spring.controller.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class MainController {
+public class HomePageController {
 
     @GetMapping("/")
     public String root() {
