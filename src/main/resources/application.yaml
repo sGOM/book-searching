@@ -5,18 +5,17 @@ spring:
     password: change me
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    # When the application is executed, JPA automatically generates the database schema based on the entities
 #    hibernate:
 #      ddl-auto: create
-    properties:
-      hibernate:
-        # Hibernate in interacting with a MySQL database is to understand and support the SQL syntax and characteristics specific to MySQL, enabling it to generate appropriate SQL queries
-        dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+server:
+  error:
+    whitelabel:
+      enabled: false
 
-database:
-  url: change me
-  username: change me
-  password: change me
+# jwt configuration
+jwt:
+  secret-key: change me
 
 # elasticsearch configuration
 elasticsearch:
@@ -27,5 +26,6 @@ elasticsearch:
   encodedApiKey: change me
   fingerprint: change me
 
+# toss configuration
 toss:
   api-key: change me
