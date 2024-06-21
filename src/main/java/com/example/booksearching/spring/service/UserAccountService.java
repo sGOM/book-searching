@@ -18,6 +18,14 @@ public class UserAccountService {
 
     private final PasswordEncoder passwordEncoder;
 
+    public UserAccountResponse getUserAccount(String username) {
+        UserAccount userAccount = userAccountRepository.findByUsername(username).orElseThrow(
+                () -> new DatabaseException(DatabaseExceptionType.NOT_FOUND)
+        );
+
+        return UserAccountResponse.from(userAccount);
+    }
+
     public void createUserAccount(UserAccountCreateRequest req) {
         userAccountRepository.save(UserAccount.of(req.username(), passwordEncoder.encode(req.password()), req.nickname(), req.role()));
     }

@@ -17,6 +17,11 @@ public class UserApiController {
 
     private final UserAccountService userAccountService;
 
+    @GetMapping("/me")
+    public ResponseEntity<UserAccountResponse> getMe(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(userAccountService.getUserAccount(jwt.getSubject()));
+    }
+
     @PostMapping("/sign-up")
     public ResponseEntity<Void> createUser(@Valid @RequestBody UserAccountCreateRequest req) {
         userAccountService.createUserAccount(req);
