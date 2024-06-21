@@ -3,6 +3,7 @@ package com.example.booksearching.spring.exception;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -17,8 +18,8 @@ public class CustomExceptionHandler {
                 .body(e.getCustomExceptionType().getErrorMsg());
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<String> constraintViolationExceptionHandler(ConstraintViolationException e) {
+    @ExceptionHandler({ConstraintViolationException.class, MethodArgumentNotValidException.class})
+    public ResponseEntity<String> constraintViolationExceptionHandler(Exception e) {
         log.error("Validation error occurred: {}", e.getMessage(), e);
         return ResponseEntity.badRequest().body("Validation error: " + e.getMessage());
     }
