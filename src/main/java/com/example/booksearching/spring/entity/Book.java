@@ -31,7 +31,6 @@ public class Book {
     @Column(nullable = false)
     private Integer price;
 
-    @Column(columnDefinition = "YEAR(4)")
     private Year publishYear;
 
     private Book(String isbn, String title, String author, Integer price, Year publishYear) {

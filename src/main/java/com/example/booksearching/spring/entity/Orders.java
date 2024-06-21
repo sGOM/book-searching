@@ -22,7 +22,7 @@ public class Orders extends AuditingFields {
     private Integer totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(nullable = false)
     private OrderStatus status;
 
     @OneToOne
@@ -30,9 +30,6 @@ public class Orders extends AuditingFields {
 
     @OneToMany
     private List<OrdersDetail> ordersDetails;
-
-    @ManyToOne
-    private UserAccount userAccount;
 
     private Orders(String id, Integer totalAmount, OrderStatus status, Payment payment, List<OrdersDetail> ordersDetails) {
         this.id = id;
