@@ -1,7 +1,6 @@
 package com.example.booksearching.spring.config;
 
 import com.example.booksearching.spring.security.authentication.dao.CustomDaoAuthenticationConfigurer;
-import com.example.booksearching.spring.security.authentication.jwt.CustomJwtAuthenticationConfigurer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -17,11 +16,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -31,16 +27,14 @@ import static com.example.booksearching.spring.security.authentication.SecurityC
 @Configuration
 public class WebSecurityConfig {
 
-    private final JwtDecoder jwtDecoder;
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                .authenticationProvider(jwtAuthenticationProvider())
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(getAuthorityNotRequiredUrl()).permitAll()
@@ -49,10 +43,6 @@ public class WebSecurityConfig {
                 .with(
                         customDaoAuthenticationConfig(),
                         Customizer.withDefaults()
-                )
-                .with(
-                        customJwtAuthenticationConfig(),
-                        config -> config.filterProcessesUrl(new NegatedRequestMatcher(getAuthorityNotRequiredUrl()))
                 );
 
         return http.build();
@@ -60,14 +50,6 @@ public class WebSecurityConfig {
 
     private CustomDaoAuthenticationConfigurer customDaoAuthenticationConfig() {
         return new CustomDaoAuthenticationConfigurer();
-    }
-
-    private CustomJwtAuthenticationConfigurer customJwtAuthenticationConfig() {
-        return new CustomJwtAuthenticationConfigurer();
-    }
-
-    private JwtAuthenticationProvider jwtAuthenticationProvider() {
-        return new JwtAuthenticationProvider(jwtDecoder);
     }
 
     private RequestMatcher getAuthorityNotRequiredUrl() {
