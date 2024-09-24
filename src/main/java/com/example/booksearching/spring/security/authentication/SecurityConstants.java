@@ -13,8 +13,4 @@ public class SecurityConstants {
 
     public static final long ACCESS_TOKEN_EXPIRATION = 1L;   // 1시간
 
-    public static final String ACCESS_TOKEN_HEADER = "Authorization";
-    public static final String BEARER_PREFIX = "Bearer ";
-    public static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
-
 }
