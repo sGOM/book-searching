@@ -15,10 +15,11 @@
 
 ## 프로젝트 구조
 
-![프로젝트 구조 이미지](/docs/images/project archtecture.svg)
+![프로젝트 구조 이미지](./docs/images/project archtecture.svg)
 
 ## API 명세
 
-
+- [유저 서비스 API 스펙 문서](./docs/specs/유저서비스_api_스펙문서.md)
+- [검색 서비스 API 스펙 문서](./docs/specs/검색서비스_api_스펙문서.md)
 
 ## ERD
